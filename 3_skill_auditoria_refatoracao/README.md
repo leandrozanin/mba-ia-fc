@@ -1,6 +1,6 @@
 # Auditoria e Refatoracao Arquitetural com Codex e Claude
 
-Desafio da pasta 3. A skill `refactor-arch` fica centralizada na raiz deste desafio para Codex e Claude Code. Os projetos-alvo são fixtures independentes; a skill não é duplicada dentro deles. Os projetos vieram do repositorio publico indicado pela spec, commit `6d1ce6248c3e956801010a89d8bdaab48029bf30`.
+Desafio 3: a skill `refactor-arch` fica centralizada na raiz deste repositório para Codex e Claude Code. Os projetos-alvo são fixtures independentes; a skill não é duplicada dentro deles. Os projetos vieram do repositório público indicado pela spec, commit `6d1ce6248c3e956801010a89d8bdaab48029bf30`.
 
 ## Análise Manual
 
@@ -43,7 +43,9 @@ A Fase 2 exige linhas verificadas, grava o relatorio e para pedindo aprovacao an
 
 Desafios encontrados: os projetos nao estavam no checkout e vieram do repositorio da spec; o computador nao tinha Node/npm, entao usei Node portatil 22.22.3 em pasta temporaria, sem instalacao global. Dependencias Python foram instaladas em venv locais. O Express nao declara script de teste: baseline feita por boot HTTP e chamadas representativas; tambem rodei `npm audit`.
 
-## Resultados
+## Resultados da execucao anterior (historico)
+
+Os dados desta secao registram uma execucao anterior da skill. Os projetos em `projects/` foram restaurados ao estado original da spec; portanto, os relatorios e a validacao descritos aqui nao representam o estado atual dos projetos. Use os exemplos em "Como Executar" para gerar relatorios atuais.
 
 | Projeto | Stack | Findings (C/H/M/L) | Total |
 |---|---|---:|---:|
@@ -81,28 +83,73 @@ Evidencias: `reports/phase-3-validation.md`. O `npm audit` final ainda aponta 8 
 
 ## Como Executar
 
+> Os diretórios em `projects/` são os projetos originais da spec. Os comandos abaixo geram novos relatórios e, somente após sua aprovação explícita, podem alterar o projeto-alvo. Execute um projeto por vez.
+
 ### Pre-requisitos
 
-- Codex com suporte a Agent Skills ou Claude Code, e Python 3.10+.
-- Projetos Flask: Python/pip e dependencias de `requirements.txt` no ambiente virtual.
-- Projeto Express: Node.js 22 LTS ou versao compativel com `sqlite3`; `npm ci`.
+- Codex CLI ou Claude Code instalado e autenticado.
+- Para a Fase 3, instale as dependências de cada projeto conforme o `requirements.txt` ou `package.json` dele.
+- A auditoria das Fases 1 e 2 não exige iniciar a aplicação; a Fase 3 pode precisar das dependências para validar boot e endpoints.
 
-### Invocar a skill
+### Abrir o monorepo da skill
 
-Abra `3_skill_auditoria_refatoracao/` como workspace para carregar a skill centralizada. No Codex, solicite `Use $refactor-arch para auditar projects/<nome-do-projeto>.`; no Claude Code, invoque `/refactor-arch` e informe o caminho do projeto-alvo. A skill executa Fase 1 e Fase 2. Revise o relatório e aprove explicitamente antes da Fase 3.
+Clone o repositório e entre na pasta dele:
 
-### Rodar e validar
+```powershell
+git clone https://github.com/leandrozanin/mba-fc-3_skill_auditoria_refatoracao.git
+cd .\mba-fc-3_skill_auditoria_refatoracao
+```
 
-- Projeto 1: `python app.py` (porta 5000).
-- Projeto 2: `npm start` (porta 3000); exemplos em `api.http`.
-- Projeto 3: `python seed.py` e `python app.py` (porta 5000).
-- Rode a suite existente, inicie a API e verifique rotas/contratos registrados.
-- Validar assets: `python -m unittest discover -s 3_skill_auditoria_refatoracao/tests -v`.
+Inicie a ferramenta nesse diretório para que ela encontre a skill centralizada:
+
+```powershell
+codex
+# ou
+claude
+```
+
+### Gerar relatórios (Fases 1 e 2)
+
+Na sessão interativa, peça a auditoria e indique explicitamente o caminho de saída. A skill deve parar ao terminar a Fase 2 e esperar sua aprovação; revise o relatório antes de autorizar qualquer alteração.
+
+**Codex:**
+
+```text
+$refactor-arch Analise projects/code-smells-project nas Fases 1 e 2. Salve o relatório em reports/audit-project-1.md. Pare após apresentar o relatório e aguarde minha aprovação explícita antes da Fase 3.
+```
+
+**Claude Code:**
+
+```text
+/refactor-arch Analise projects/code-smells-project nas Fases 1 e 2. Salve o relatório em reports/audit-project-1.md. Pare após apresentar o relatório e aguarde minha aprovação explícita antes da Fase 3.
+```
+
+Repita para os outros projetos, mudando projeto e destino:
+
+| Projeto | Caminho a analisar | Arquivo do relatório |
+|---|---|---|
+| 1 — code-smells-project | `projects/code-smells-project` | `reports/audit-project-1.md` |
+| 2 — ecommerce-api-legacy | `projects/ecommerce-api-legacy` | `reports/audit-project-2.md` |
+| 3 — task-manager-api | `projects/task-manager-api` | `reports/audit-project-3.md` |
+
+### Aprovar e executar a refatoração (Fase 3)
+
+Depois de revisar o relatório, aprove a Fase 3 de forma explícita na mesma sessão. Por exemplo:
+
+```text
+Aprovo o relatório reports/audit-project-1.md. Execute a Fase 3 somente em projects/code-smells-project, seguindo os achados aprovados. Preserve os contratos existentes e informe os comandos e resultados reais da validação.
+```
+
+Se iniciar uma nova sessão, forneça o caminho do relatório e confirme explicitamente a aprovação. A skill deve registrar baseline, refatorar apenas o diretório do projeto indicado e relatar limitações caso dependências ou serviços impeçam a validação.
+
+### Repetir um teste
+
+Como os projetos estão dentro deste monorepo, a Fase 3 modifica os próprios diretórios em `projects/`. Para repetir a execução desde o estado original, restaure ou clone novamente os projetos da revisão indicada no início deste README antes de autorizar outra refatoração. Guarde os relatórios que quiser comparar; uma nova auditoria no mesmo caminho de saída substitui o relatório anterior.
 
 ### Ordem sugerida
 
-1. Analise os projetos e documente achados manualmente.
-2. Crie a skill e confira as referencias.
-3. Rode Fase 1 e Fase 2 em cada projeto e salve os relatorios.
-4. Revise cada relatorio e aprove a Fase 3.
-5. Refatore e valide um projeto por vez; atualize checklist com evidencias.
+1. Inicie Codex ou Claude Code na raiz deste repositório clonado.
+2. Execute Fases 1 e 2 para um projeto e salve o relatório em `reports/`.
+3. Revise os achados e aprove ou recuse a Fase 3 explicitamente.
+4. Se aprovada, refatore e valide somente esse projeto.
+5. Repita o processo para os demais projetos e atualize os resultados deste README com evidências atuais.
