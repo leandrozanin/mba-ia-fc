@@ -1,6 +1,6 @@
-# Auditoria e Refatoracao Arquitetural com Codex
+# Auditoria e Refatoracao Arquitetural com Codex e Claude
 
-Desafio da pasta 3. A skill `refactor-arch` foi criada para Codex e copiada para os tres projetos de entrada. Os projetos vieram do repositorio publico indicado pela spec, commit `6d1ce6248c3e956801010a89d8bdaab48029bf30`.
+Desafio da pasta 3. A skill `refactor-arch` fica centralizada na raiz deste desafio para Codex e Claude Code. Os projetos-alvo são fixtures independentes; a skill não é duplicada dentro deles. Os projetos vieram do repositorio publico indicado pela spec, commit `6d1ce6248c3e956801010a89d8bdaab48029bf30`.
 
 ## Análise Manual
 
@@ -35,7 +35,7 @@ Desafio da pasta 3. A skill `refactor-arch` foi criada para Codex e copiada para
 
 ## Construção da Skill
 
-A skill esta em `.agents/skills/refactor-arch/`, no formato repo-local do Codex. `SKILL.md` define as tres fases e carrega referencias Markdown para analise de projeto, catalogo de anti-patterns, template de relatorio, guidelines MVC e playbook. A mesma pasta da skill foi copiada para cada projeto para permitir invocacao local.
+A versão Codex está em `.agents/skills/refactor-arch/` e a versão Claude Code em `.claude/skills/refactor-arch/`, ambas na raiz deste desafio. Os conteúdos são mantidos idênticos; `SKILL.md` define as três fases e carrega referências Markdown para análise de projeto, catálogo de anti-patterns, template de relatório, guidelines MVC e playbook. A centralização evita divergência entre cópias e mantém os projetos-alvo sem arquivos auxiliares da skill.
 
 O catalogo cobre secrets, SQL injection, God Class, regras em handlers, estado global, transacoes, N+1, validacao, erros, APIs deprecated, magic values, codigo morto e logging. A deteccao comeca por manifestos/entry points e fluxo real, e so depois aplica sinais e mapeamento MVC idiomatico da stack. O playbook tem dez transformacoes com exemplos antes/depois.
 
@@ -83,13 +83,13 @@ Evidencias: `reports/phase-3-validation.md`. O `npm audit` final ainda aponta 8 
 
 ### Pre-requisitos
 
-- Codex com suporte a Agent Skills e Python 3.10+.
+- Codex com suporte a Agent Skills ou Claude Code, e Python 3.10+.
 - Projetos Flask: Python/pip e dependencias de `requirements.txt` no ambiente virtual.
 - Projeto Express: Node.js 22 LTS ou versao compativel com `sqlite3`; `npm ci`.
 
 ### Invocar a skill
 
-Abra cada projeto como workspace do Codex e solicite: `Use $refactor-arch para auditar este projeto.` A skill executa Fase 1 e Fase 2. Revise o relatorio e aprove explicitamente antes da Fase 3.
+Abra `3_skill_auditoria_refatoracao/` como workspace para carregar a skill centralizada. No Codex, solicite `Use $refactor-arch para auditar projects/<nome-do-projeto>.`; no Claude Code, invoque `/refactor-arch` e informe o caminho do projeto-alvo. A skill executa Fase 1 e Fase 2. Revise o relatório e aprove explicitamente antes da Fase 3.
 
 ### Rodar e validar
 
