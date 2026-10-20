@@ -81,6 +81,14 @@ Rode os comandos a partir da raiz desta pasta, com o ambiente virtual ativado.
 
 ## Testes locais
 
+Os testes unitários de validação não acessam LangSmith nem chamam modelos:
+
+```powershell
+python -m unittest discover -s tests -p 'test_*validation.py' -v
+```
+
+Antes de avaliar, o script confere os 15 exemplos locais e compara entradas e referências com um dataset LangSmith existente. Se estiver desatualizado, a avaliação para e recomenda usar outro `LANGSMITH_PROJECT`, preservando o dataset remoto.
+
 Os seis testes de formato do prompt não usam LangSmith nem chamam modelos:
 
 ```powershell

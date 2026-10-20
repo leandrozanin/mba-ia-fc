@@ -56,6 +56,8 @@ Use o mesmo modelo e dimensão de embeddings na ingestão e nas consultas. Se tr
 
 ## 3. Iniciar o banco de dados
 
+Configure `SEARCH_MAX_DISTANCE` com base em perguntas conhecidas do seu documento. O pgvector retorna distâncias de cosseno; valores menores indicam trechos mais próximos. Trechos acima do limite são descartados antes da geração da resposta.
+
 Na pasta do projeto, execute:
 
 ```powershell
@@ -65,6 +67,8 @@ docker compose up -d --wait
 Esse comando inicia o PostgreSQL com a extensão pgvector e aguarda o banco ficar pronto.
 
 ## 4. Ingerir o PDF
+
+A ingestão cria uma collection temporária e só a ativa depois de gravar todos os chunks. Se embeddings ou gravação falharem, a collection ativa anterior permanece em uso.
 
 Com o ambiente virtual ativo e o banco ligado, execute:
 

@@ -27,8 +27,10 @@ from langsmith import Client
 from langchain_core.prompts import ChatPromptTemplate
 from utils import check_env_vars, format_score, print_section_header, get_llm as get_configured_llm
 from metrics import evaluate_f1_score, evaluate_clarity, evaluate_precision
+from dataset_validation import dataset_matches_examples, validate_dataset_examples
 
-load_dotenv()
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+load_dotenv(PROJECT_ROOT / ".env")
 
 # Nota mínima exigida em CADA métrica e também na média geral
 APPROVAL_THRESHOLD = 0.8
@@ -44,26 +46,19 @@ def get_llm():
 def load_dataset_from_jsonl(jsonl_path: str) -> List[Dict[str, Any]]:
     examples = []
 
-    try:
-        with open(jsonl_path, 'r', encoding='utf-8') as f:
-            for line in f:
-                line = line.strip()
-                if line:  # Ignorar linhas vazias
-                    example = json.loads(line)
-                    examples.append(example)
+    with open(jsonl_path, 'r', encoding='utf-8') as f:
+        for line_number, line in enumerate(f, 1):
+            line = line.strip()
+            if line:
+                try:
+                    examples.append(json.loads(line))
+                except json.JSONDecodeError as error:
+                    raise ValueError(
+                        f"JSONL inválido na linha {line_number}: {error}"
+                    ) from error
 
-        return examples
-
-    except FileNotFoundError:
-        print(f"❌ Arquivo não encontrado: {jsonl_path}")
-        print("\nCertifique-se de que o arquivo datasets/bug_to_user_story.jsonl existe.")
-        return []
-    except json.JSONDecodeError as e:
-        print(f"❌ Erro ao parsear JSONL: {e}")
-        return []
-    except Exception as e:
-        print(f"❌ Erro ao carregar dataset: {e}")
-        return []
+    validate_dataset_examples(examples)
+    return examples
 
 
 def create_evaluation_dataset(client: Client, dataset_name: str, jsonl_path: str) -> str:
@@ -71,19 +66,37 @@ def create_evaluation_dataset(client: Client, dataset_name: str, jsonl_path: str
 
     examples = load_dataset_from_jsonl(jsonl_path)
 
-    if not examples:
-        print("❌ Nenhum exemplo carregado do arquivo .jsonl")
-        return dataset_name
-
     print(f"   ✓ Carregados {len(examples)} exemplos do arquivo {jsonl_path}")
 
     try:
-        for ds in client.list_datasets(dataset_name=dataset_name):
-            if ds.name == dataset_name:
-                print(f"   ✓ Dataset '{dataset_name}' já existe, usando existente")
-                print(f"   ✓ {ds.url}")
-                return dataset_name
+        existing_dataset = next(
+            (
+                dataset
+                for dataset in client.list_datasets(dataset_name=dataset_name)
+                if dataset.name == dataset_name
+            ),
+            None,
+        )
+    except Exception as error:
+        raise RuntimeError(f"Não foi possível consultar o dataset {dataset_name}: {error}") from error
 
+    if existing_dataset:
+        try:
+            remote_examples = list(client.list_examples(dataset_id=existing_dataset.id))
+        except Exception as error:
+            raise RuntimeError(
+                f"Não foi possível conferir os exemplos do dataset {dataset_name}: {error}"
+            ) from error
+        if not dataset_matches_examples(remote_examples, examples):
+            raise ValueError(
+                f"O dataset LangSmith {dataset_name} não corresponde aos 15 exemplos locais. "
+                "Use outro LANGSMITH_PROJECT para criar um dataset novo e preservar o existente."
+            )
+        print(f"   ✓ Dataset '{dataset_name}' validado com {len(examples)} exemplos")
+        print(f"   ✓ {existing_dataset.url}")
+        return dataset_name
+
+    try:
         dataset = client.create_dataset(dataset_name=dataset_name)
 
         for example in examples:
@@ -98,8 +111,7 @@ def create_evaluation_dataset(client: Client, dataset_name: str, jsonl_path: str
         return dataset_name
 
     except Exception as e:
-        print(f"   ⚠️  Erro ao criar dataset: {e}")
-        return dataset_name
+        raise RuntimeError(f"Não foi possível criar o dataset {dataset_name}: {e}") from e
 
 
 def pull_prompt_from_langsmith(client: Client, prompt_name: str) -> ChatPromptTemplate:
@@ -333,15 +345,19 @@ def main():
     project_name = os.getenv("LANGSMITH_PROJECT")
     username = os.getenv("USERNAME_LANGSMITH_HUB")
 
-    jsonl_path = "datasets/bug_to_user_story.jsonl"
+    jsonl_path = PROJECT_ROOT / "datasets" / "bug_to_user_story.jsonl"
 
-    if not Path(jsonl_path).exists():
+    if not jsonl_path.exists():
         print(f"❌ Arquivo de dataset não encontrado: {jsonl_path}")
         print("\nCertifique-se de que o arquivo existe antes de continuar.")
         return 1
 
     dataset_name = f"{project_name}-eval"
-    create_evaluation_dataset(client, dataset_name, jsonl_path)
+    try:
+        create_evaluation_dataset(client, dataset_name, str(jsonl_path))
+    except Exception as error:
+        print(f"Falha ao preparar o dataset de avaliação: {error}")
+        return 1
 
     print("\n" + "=" * 70)
     print("PROMPTS PARA AVALIAR")

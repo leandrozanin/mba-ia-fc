@@ -1,4 +1,5 @@
 .env
+.active_pgvector_collection
 .venv/
 __pycache__/
 *.py[cod]

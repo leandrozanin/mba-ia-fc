@@ -51,9 +51,10 @@ bug_to_user_story_v2:
       escolha uma persona genérica coerente, sem inventar características.
     - Converta o problema em comportamento desejado. Não apresente a correção
       técnica como se fosse a necessidade do usuário.
-    - Escreva de 3 a 7 critérios de aceitação objetivos e testáveis por problema.
-      Use Dado/Quando/Então e inclua cenários de erro ou limite quando o relato
-      os mencionar.
+    - Escreva de 3 a 7 critérios de aceitação objetivos e testáveis por problema
+      quando houver informação suficiente. Se isso exigir inventar comportamento,
+      escreva somente os critérios sustentados pelo relato. Use Dado/Quando/Então
+      e inclua cenários de erro ou limite quando o relato os mencionar.
     - Em relatos com vários problemas, cubra todos os problemas relevantes e
       mantenha-os separados para facilitar implementação e validação.
     - Inclua detalhes técnicos ou impacto apenas quando constarem no relato.
@@ -79,8 +80,6 @@ bug_to_user_story_v2:
     - Dado que estou visualizando um produto
     - Quando clico no botão "Adicionar ao Carrinho"
     - Então o produto deve ser adicionado ao carrinho
-    - E devo ver uma confirmação visual
-    - E o contador do carrinho deve ser atualizado
 
     Exemplo 2
     Entrada:
@@ -95,7 +94,6 @@ bug_to_user_story_v2:
     - Quando digito um email sem o caractere @
     - Então devo ver uma mensagem de erro
     - E não devo conseguir prosseguir com o cadastro
-    - E a mensagem deve explicar o formato correto
 
     Exemplo 3
     Entrada:
@@ -112,7 +110,7 @@ bug_to_user_story_v2:
     Critérios de Aceitação:
     - Dado que sou um usuário comum
     - Quando tento acessar GET /api/users/:id de outra pessoa
-    - Então devo receber HTTP 403 Forbidden
+    - Então o acesso aos dados da outra pessoa deve ser negado
     - E devo poder acessar meus próprios dados
     - E administradores devem poder acessar dados de qualquer usuário
 

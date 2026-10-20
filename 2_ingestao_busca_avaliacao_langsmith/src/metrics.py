@@ -26,6 +26,7 @@ from typing import Dict, Any
 from dotenv import load_dotenv
 from langchain_core.messages import SystemMessage, HumanMessage
 from utils import get_eval_llm
+from evaluation_validation import require_unit_score
 
 load_dotenv()
 
@@ -59,7 +60,7 @@ def extract_json_from_response(response_text: str) -> Dict[str, Any]:
 
         # Se não conseguir extrair, retornar valores default
         print(f"⚠️  Não foi possível extrair JSON da resposta: {response_text[:200]}...")
-        return {"score": 0.0, "reasoning": "Erro ao processar resposta"}
+        raise ValueError("A resposta do avaliador não contém JSON válido.")
 
 
 def evaluate_f1_score(question: str, answer: str, reference: str) -> Dict[str, Any]:
@@ -129,8 +130,8 @@ NÃO adicione nenhum texto antes ou depois do JSON.
         response = llm.invoke([HumanMessage(content=evaluator_prompt)])
         result = extract_json_from_response(response.text)
 
-        precision = float(result.get("precision", 0.0))
-        recall = float(result.get("recall", 0.0))
+        precision = require_unit_score(result.get("precision"), "F1 precision")
+        recall = require_unit_score(result.get("recall"), "F1 recall")
 
         # Calcular F1-Score
         if (precision + recall) > 0:
@@ -147,12 +148,7 @@ NÃO adicione nenhum texto antes ou depois do JSON.
 
     except Exception as e:
         print(f"❌ Erro ao avaliar F1-Score: {e}")
-        return {
-            "score": 0.0,
-            "precision": 0.0,
-            "recall": 0.0,
-            "reasoning": f"Erro na avaliação: {str(e)}"
-        }
+        raise RuntimeError(f"Falha na avaliação F1-Score: {e}") from e
 
 
 def evaluate_clarity(question: str, answer: str, reference: str) -> Dict[str, Any]:
@@ -226,7 +222,7 @@ NÃO adicione nenhum texto antes ou depois do JSON.
         response = llm.invoke([HumanMessage(content=evaluator_prompt)])
         result = extract_json_from_response(response.text)
 
-        score = float(result.get("score", 0.0))
+        score = require_unit_score(result.get("score"), "Clarity")
 
         return {
             "score": round(score, 4),
@@ -235,10 +231,7 @@ NÃO adicione nenhum texto antes ou depois do JSON.
 
     except Exception as e:
         print(f"❌ Erro ao avaliar Clarity: {e}")
-        return {
-            "score": 0.0,
-            "reasoning": f"Erro na avaliação: {str(e)}"
-        }
+        raise RuntimeError(f"Falha na avaliação Clarity: {e}") from e
 
 
 def evaluate_precision(question: str, answer: str, reference: str) -> Dict[str, Any]:
@@ -313,7 +306,7 @@ NÃO adicione nenhum texto antes ou depois do JSON.
         response = llm.invoke([HumanMessage(content=evaluator_prompt)])
         result = extract_json_from_response(response.text)
 
-        score = float(result.get("score", 0.0))
+        score = require_unit_score(result.get("score"), "Precision")
 
         return {
             "score": round(score, 4),
@@ -322,10 +315,7 @@ NÃO adicione nenhum texto antes ou depois do JSON.
 
     except Exception as e:
         print(f"❌ Erro ao avaliar Precision: {e}")
-        return {
-            "score": 0.0,
-            "reasoning": f"Erro na avaliação: {str(e)}"
-        }
+        raise RuntimeError(f"Falha na avaliação Precision: {e}") from e
 
 
 def evaluate_tone_score(bug_report: str, user_story: str, reference: str) -> Dict[str, Any]:

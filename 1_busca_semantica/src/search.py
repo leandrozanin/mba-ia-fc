@@ -7,12 +7,14 @@ from langchain_postgres.vectorstores import PGVector
 
 from config import (
     CHAT_MODEL,
-    COLLECTION_NAME,
     DATABASE_URL,
     EMBEDDING_DIMENSIONS,
     EMBEDDING_MODEL,
     FALLBACK_ANSWER,
+    SEARCH_MAX_DISTANCE,
+    active_collection_name,
 )
+from retrieval import retrieve_context
 
 TOP_K = 10
 
@@ -53,7 +55,7 @@ def get_vector_store() -> PGVector:
     )
     return PGVector(
         embeddings=embeddings,
-        collection_name=COLLECTION_NAME,
+        collection_name=active_collection_name(),
         connection=DATABASE_URL,
         use_jsonb=True,
     )
@@ -62,8 +64,12 @@ def get_vector_store() -> PGVector:
 def answer_question(question: str) -> str:
     """Responde usando somente os dez trechos mais próximos do PDF ingerido."""
     vector_store = get_vector_store()
-    matches = vector_store.similarity_search_with_score(question, k=TOP_K)
-    context = "\n\n---\n\n".join(document.page_content for document, _ in matches)
+    context = retrieve_context(
+        vector_store,
+        question,
+        k=TOP_K,
+        max_distance=SEARCH_MAX_DISTANCE,
+    )
     if not context.strip():
         return FALLBACK_ANSWER
 
