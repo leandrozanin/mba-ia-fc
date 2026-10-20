@@ -1,0 +1,8 @@
+{
+  "name": "desafio-arquitetura-ia-boilerplate",
+  "version": "1.0.0",
+  "description": "Boilerplate refatorado para arquitetura em camadas",
+  "main": "src/app.js",
+  "scripts": { "start": "node src/app.js", "test": "node --test" },
+  "dependencies": { "express": "^4.18.2", "sqlite3": "^5.1.6" }
+}
