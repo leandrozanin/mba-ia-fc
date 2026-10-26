@@ -1,0 +1,36 @@
+2026-10-26 20:38:38,627 INFO __main__: Servidor em http://127.0.0.1:5000
+ * Serving Flask app 'app'
+ * Debug mode: off
+2026-10-26 20:38:38,652 INFO werkzeug: WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:5000
+2026-10-26 20:38:38,652 INFO werkzeug: Press CTRL+C to quit
+2026-10-26 20:38:38,883 INFO werkzeug: 127.0.0.1 - - [26/Oct/2026 20:38:38] "GET / HTTP/1.1" 200 -
+2026-10-26 20:38:38,888 INFO werkzeug: 127.0.0.1 - - [26/Oct/2026 20:38:38] "GET /health HTTP/1.1" 200 -
+2026-10-26 20:38:38,896 INFO werkzeug: 127.0.0.1 - - [26/Oct/2026 20:38:38] "GET /produtos HTTP/1.1" 200 -
+2026-10-26 20:38:38,901 INFO werkzeug: 127.0.0.1 - - [26/Oct/2026 20:38:38] "GET /produtos/1 HTTP/1.1" 200 -
+2026-10-26 20:38:38,905 INFO werkzeug: 127.0.0.1 - - [26/Oct/2026 20:38:38] "GET /produtos/999 HTTP/1.1" 404 -
+2026-10-26 20:38:38,909 INFO werkzeug: 127.0.0.1 - - [26/Oct/2026 20:38:38] "GET /produtos/busca?q=Mouse&categoria=informatica&preco_min=10&preco_max=500 HTTP/1.1" 200 -
+2026-10-26 20:38:38,923 INFO controllers.produto_controller: Produto criado: id=11
+2026-10-26 20:38:38,924 INFO werkzeug: 127.0.0.1 - - [26/Oct/2026 20:38:38] "POST /produtos HTTP/1.1" 201 -
+2026-10-26 20:38:38,947 INFO werkzeug: 127.0.0.1 - - [26/Oct/2026 20:38:38] "POST /produtos HTTP/1.1" 400 -
+2026-10-26 20:38:38,971 INFO werkzeug: 127.0.0.1 - - [26/Oct/2026 20:38:38] "PUT /produtos/1 HTTP/1.1" 200 -
+2026-10-26 20:38:38,986 INFO controllers.produto_controller: Produto deletado: id=11
+2026-10-26 20:38:38,987 INFO werkzeug: 127.0.0.1 - - [26/Oct/2026 20:38:38] "DELETE /produtos/11 HTTP/1.1" 200 -
+2026-10-26 20:38:38,992 INFO werkzeug: 127.0.0.1 - - [26/Oct/2026 20:38:38] "GET /usuarios HTTP/1.1" 200 -
+2026-10-26 20:38:38,998 INFO werkzeug: 127.0.0.1 - - [26/Oct/2026 20:38:38] "GET /usuarios/1 HTTP/1.1" 200 -
+2026-10-26 20:38:39,213 INFO controllers.usuario_controller: Usuário criado: id=4
+2026-10-26 20:38:39,213 INFO werkzeug: 127.0.0.1 - - [26/Oct/2026 20:38:39] "POST /usuarios HTTP/1.1" 201 -
+2026-10-26 20:38:39,414 INFO werkzeug: 127.0.0.1 - - [26/Oct/2026 20:38:39] "POST /login HTTP/1.1" 200 -
+2026-10-26 20:38:39,608 INFO controllers.usuario_controller: Tentativa de login recusada
+2026-10-26 20:38:39,615 INFO werkzeug: 127.0.0.1 - - [26/Oct/2026 20:38:39] "POST /login HTTP/1.1" 401 -
+2026-10-26 20:38:39,626 INFO services.notification_service: Notificação: pedido 1 criado para usuário 2
+2026-10-26 20:38:39,626 INFO werkzeug: 127.0.0.1 - - [26/Oct/2026 20:38:39] "POST /pedidos HTTP/1.1" 201 -
+2026-10-26 20:38:39,635 INFO werkzeug: 127.0.0.1 - - [26/Oct/2026 20:38:39] "POST /pedidos HTTP/1.1" 400 -
+2026-10-26 20:38:39,640 INFO werkzeug: 127.0.0.1 - - [26/Oct/2026 20:38:39] "GET /pedidos HTTP/1.1" 200 -
+2026-10-26 20:38:39,663 INFO werkzeug: 127.0.0.1 - - [26/Oct/2026 20:38:39] "GET /pedidos/usuario/2 HTTP/1.1" 200 -
+2026-10-26 20:38:39,673 INFO services.notification_service: Notificação: pedido 1 mudou para aprovado
+2026-10-26 20:38:39,673 INFO werkzeug: 127.0.0.1 - - [26/Oct/2026 20:38:39] "PUT /pedidos/1/status HTTP/1.1" 200 -
+2026-10-26 20:38:39,698 INFO werkzeug: 127.0.0.1 - - [26/Oct/2026 20:38:39] "PUT /pedidos/1/status HTTP/1.1" 400 -
+2026-10-26 20:38:39,703 INFO werkzeug: 127.0.0.1 - - [26/Oct/2026 20:38:39] "GET /relatorios/vendas HTTP/1.1" 200 -
+2026-10-26 20:38:39,714 INFO werkzeug: 127.0.0.1 - - [26/Oct/2026 20:38:39] "POST /admin/query HTTP/1.1" 404 -
+2026-10-26 20:38:39,714 INFO werkzeug: 127.0.0.1 - - [26/Oct/2026 20:38:39] "POST /admin/reset-db HTTP/1.1" 403 -

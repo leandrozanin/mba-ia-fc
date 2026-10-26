@@ -1,0 +1,38 @@
+==================================================
+SERVIDOR INICIADO
+Rodando em http://localhost:5000
+==================================================
+ * Serving Flask app 'app'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.125:5000
+Press CTRL+C to quit
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 828-594-831
+127.0.0.1 - - [26/Oct/2026 20:34:18] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 20:34:18] "GET /health HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 20:34:18] "GET /produtos HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 20:34:18] "GET /produtos/1 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 20:34:18] "GET /produtos/999 HTTP/1.1" 404 -
+127.0.0.1 - - [26/Oct/2026 20:34:18] "GET /produtos/busca?q=Mouse&categoria=informatica&preco_min=10&preco_max=500 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 20:34:18] "POST /produtos HTTP/1.1" 201 -
+127.0.0.1 - - [26/Oct/2026 20:34:18] "POST /produtos HTTP/1.1" 400 -
+127.0.0.1 - - [26/Oct/2026 20:34:18] "PUT /produtos/1 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 20:34:18] "DELETE /produtos/11 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 20:34:18] "GET /usuarios HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 20:34:18] "GET /usuarios/1 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 20:34:18] "POST /usuarios HTTP/1.1" 201 -
+127.0.0.1 - - [26/Oct/2026 20:34:18] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 20:34:18] "POST /login HTTP/1.1" 401 -
+127.0.0.1 - - [26/Oct/2026 20:34:18] "POST /pedidos HTTP/1.1" 201 -
+127.0.0.1 - - [26/Oct/2026 20:34:18] "POST /pedidos HTTP/1.1" 400 -
+127.0.0.1 - - [26/Oct/2026 20:34:18] "GET /pedidos HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 20:34:18] "GET /pedidos/usuario/2 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 20:34:18] "PUT /pedidos/1/status HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 20:34:18] "PUT /pedidos/1/status HTTP/1.1" 400 -
+127.0.0.1 - - [26/Oct/2026 20:34:18] "GET /relatorios/vendas HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 20:34:18] "POST /admin/query HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 20:34:18] "POST /admin/reset-db HTTP/1.1" 200 -

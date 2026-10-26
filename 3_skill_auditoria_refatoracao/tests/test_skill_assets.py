@@ -6,6 +6,7 @@ import unittest
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 CODEX_SKILL_ROOT = REPOSITORY_ROOT / ".agents" / "skills" / "refactor-arch"
 CLAUDE_SKILL_ROOT = REPOSITORY_ROOT / ".claude" / "skills" / "refactor-arch"
+PROJECTS = ("code-smells-project", "ecommerce-api-legacy", "task-manager-api")
 
 
 class RefactorArchSkillAssetsTests(unittest.TestCase):
@@ -66,12 +67,30 @@ class RefactorArchSkillAssetsTests(unittest.TestCase):
 
         self.assertEqual(codex_files, claude_files)
 
-    def test_project_fixtures_do_not_embed_duplicate_skill_copies(self):
-        for project in (REPOSITORY_ROOT / "projects").iterdir():
-            if project.is_dir():
-                with self.subTest(project=project.name):
-                    self.assertFalse((project / ".agents" / "skills" / "refactor-arch" / "SKILL.md").exists())
-                    self.assertFalse((project / ".claude" / "skills" / "refactor-arch" / "SKILL.md").exists())
+    def test_each_project_has_an_identical_copy_of_the_claude_skill(self):
+        expected = {
+            path.relative_to(CLAUDE_SKILL_ROOT): path.read_bytes()
+            for path in CLAUDE_SKILL_ROOT.rglob("*")
+            if path.is_file()
+        }
+        for project in PROJECTS:
+            copy_root = REPOSITORY_ROOT / "projects" / project / ".claude" / "skills" / "refactor-arch"
+            with self.subTest(project=project):
+                actual = {
+                    path.relative_to(copy_root): path.read_bytes()
+                    for path in copy_root.rglob("*")
+                    if path.is_file()
+                }
+                self.assertEqual(actual, expected)
+
+    def test_audit_reports_exist_with_required_names(self):
+        for number in (1, 2, 3):
+            with self.subTest(report=number):
+                report = REPOSITORY_ROOT / "reports" / f"audit-project-{number}.md"
+                content = report.read_text(encoding="utf-8")
+                self.assertRegex(content, r"\[(CRITICAL|HIGH)\]")
+                self.assertGreaterEqual(len(re.findall(r"^### \[(CRITICAL|HIGH|MEDIUM|LOW)\]", content, re.MULTILINE)), 5)
+                self.assertIn("Gate da Fase 2", content)
 
 
 if __name__ == "__main__":

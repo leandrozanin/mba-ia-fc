@@ -1,0 +1,135 @@
+{
+  "project": "ecommerce-api-legacy",
+  "booted": true,
+  "results": [
+    {
+      "method": "POST",
+      "path": "/api/checkout",
+      "status": 200,
+      "keys": [
+        "enrollment_id",
+        "msg"
+      ],
+      "body": {
+        "msg": "Sucesso",
+        "enrollment_id": 2
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/checkout",
+      "status": 400,
+      "keys": "text",
+      "body": "Pagamento recusado"
+    },
+    {
+      "method": "POST",
+      "path": "/api/checkout",
+      "status": 400,
+      "keys": "text",
+      "body": "Pagamento recusado"
+    },
+    {
+      "method": "POST",
+      "path": "/api/checkout",
+      "status": 404,
+      "keys": "text",
+      "body": "Curso não encontrado"
+    },
+    {
+      "method": "POST",
+      "path": "/api/checkout",
+      "status": 400,
+      "keys": "text",
+      "body": "Bad Request"
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/financial-report",
+      "status": 200,
+      "keys": "list",
+      "body": [
+        {
+          "course": "Docker",
+          "revenue": 0,
+          "students": []
+        },
+        {
+          "course": "Clean Architecture",
+          "revenue": 1994,
+          "students": [
+            {
+              "student": "Leonan",
+              "paid": 997
+            },
+            {
+              "student": "Smoke",
+              "paid": 997
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/users/1",
+      "status": 200,
+      "keys": "text",
+      "body": "Usuário deletado, mas as matrículas e pagamentos ficaram sujos no banco."
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/financial-report",
+      "status": 200,
+      "keys": "list",
+      "body": [
+        {
+          "course": "Docker",
+          "revenue": 0,
+          "students": []
+        },
+        {
+          "course": "Clean Architecture",
+          "revenue": 1994,
+          "students": [
+            {
+              "student": "Unknown",
+              "paid": 997
+            },
+            {
+              "student": "Smoke",
+              "paid": 997
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/financial-report",
+      "status": 200,
+      "keys": "list",
+      "body": [
+        {
+          "course": "Docker",
+          "revenue": 0,
+          "students": []
+        },
+        {
+          "course": "Clean Architecture",
+          "revenue": 1994,
+          "students": [
+            {
+              "student": "Unknown",
+              "paid": 997
+            },
+            {
+              "student": "Smoke",
+              "paid": 997
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
