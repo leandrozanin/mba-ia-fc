@@ -214,10 +214,12 @@ O código original está na tag `original-projects`. Para rodar a skill do zero 
 
 ```bash
 git worktree add ../refactor-arch-original original-projects
-cd ../refactor-arch-original/3_skill_auditoria_refatoracao/projects/code-smells-project
+cd ../refactor-arch-original/projects/code-smells-project
 mkdir -p .claude/skills && cp -r ../../.claude/skills/refactor-arch .claude/skills/
 claude "/refactor-arch"
 ```
+
+No monorepo `mba-ia-fc`, o desafio fica na subpasta `3_skill_auditoria_refatoracao/`: use `cd ../refactor-arch-original/3_skill_auditoria_refatoracao/projects/code-smells-project`.
 
 A skill imprime a análise (Fase 1), gera o relatório e **para pedindo aprovação** (Fase 2). Só depois de responder "sim" ela refatora e valida (Fase 3). Repita em `../ecommerce-api-legacy` e `../task-manager-api`.
 
