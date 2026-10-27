@@ -1,22 +1,22 @@
-const logger = require('./logger');
+const DEFAULT_PORT = 3000;
 
-function loadConfig(overrides = {}) {
-    const config = {
-        port: Number(process.env.PORT || 3000),
-        databaseFile: process.env.DATABASE_FILE || ':memory:',
-        paymentGatewayKey: process.env.PAYMENT_GATEWAY_KEY || null,
-        adminApiToken: process.env.ADMIN_API_TOKEN || null,
-        seedUserPassword: process.env.SEED_USER_PASSWORD || null,
-        ...overrides,
+function loadConfig(env = process.env) {
+    const adminToken = env.ADMIN_TOKEN;
+    if (!adminToken) {
+        throw new Error('Variável de ambiente ADMIN_TOKEN é obrigatória');
+    }
+
+    const port = env.PORT ? Number(env.PORT) : DEFAULT_PORT;
+    if (!Number.isInteger(port) || port < 0) {
+        throw new Error('PORT deve ser um inteiro não negativo');
+    }
+
+    return {
+        port,
+        adminToken,
+        dbFile: env.DB_FILE || ':memory:',
+        paymentGatewayKey: env.PAYMENT_GATEWAY_KEY || null,
     };
-
-    if (!config.paymentGatewayKey) {
-        logger.warn('PAYMENT_GATEWAY_KEY não definida; usando apenas o gateway simulado.');
-    }
-    if (!config.adminApiToken) {
-        logger.warn('ADMIN_API_TOKEN não definida; rotas administrativas ficam bloqueadas.');
-    }
-    return config;
 }
 
 module.exports = { loadConfig };

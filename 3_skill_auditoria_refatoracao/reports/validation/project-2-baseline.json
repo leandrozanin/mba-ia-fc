@@ -5,6 +5,7 @@
     {
       "method": "POST",
       "path": "/api/checkout",
+      "auth": false,
       "status": 200,
       "keys": [
         "enrollment_id",
@@ -18,6 +19,7 @@
     {
       "method": "POST",
       "path": "/api/checkout",
+      "auth": false,
       "status": 400,
       "keys": "text",
       "body": "Pagamento recusado"
@@ -25,13 +27,7 @@
     {
       "method": "POST",
       "path": "/api/checkout",
-      "status": 400,
-      "keys": "text",
-      "body": "Pagamento recusado"
-    },
-    {
-      "method": "POST",
-      "path": "/api/checkout",
+      "auth": false,
       "status": 404,
       "keys": "text",
       "body": "Curso não encontrado"
@@ -39,6 +35,7 @@
     {
       "method": "POST",
       "path": "/api/checkout",
+      "auth": false,
       "status": 400,
       "keys": "text",
       "body": "Bad Request"
@@ -46,6 +43,7 @@
     {
       "method": "GET",
       "path": "/api/admin/financial-report",
+      "auth": true,
       "status": 200,
       "keys": "list",
       "body": [
@@ -59,11 +57,11 @@
           "revenue": 1994,
           "students": [
             {
-              "student": "Leonan",
+              "student": "Smoke",
               "paid": 997
             },
             {
-              "student": "Smoke",
+              "student": "Leonan",
               "paid": 997
             }
           ]
@@ -73,6 +71,7 @@
     {
       "method": "DELETE",
       "path": "/api/users/1",
+      "auth": true,
       "status": 200,
       "keys": "text",
       "body": "Usuário deletado, mas as matrículas e pagamentos ficaram sujos no banco."
@@ -80,6 +79,7 @@
     {
       "method": "GET",
       "path": "/api/admin/financial-report",
+      "auth": true,
       "status": 200,
       "keys": "list",
       "body": [
@@ -107,6 +107,7 @@
     {
       "method": "GET",
       "path": "/api/admin/financial-report",
+      "auth": false,
       "status": 200,
       "keys": "list",
       "body": [

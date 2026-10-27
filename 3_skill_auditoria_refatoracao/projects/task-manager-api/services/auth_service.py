@@ -1,25 +1,22 @@
-from flask import current_app
-from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
-
-from database import db
-from models.user import User
-
-TOKEN_SALT = 'task-manager-auth'
+from itsdangerous import BadSignature, URLSafeTimedSerializer
 
 
-def _serializer():
-    return URLSafeTimedSerializer(current_app.config['SECRET_KEY'], salt=TOKEN_SALT)
+class AuthService:
+    """Emite e verifica tokens assinados com SECRET_KEY e prazo de validade."""
 
+    _SALT = 'task-manager-auth'
 
-def issue_token(user):
-    """Token assinado com SECRET_KEY e com expiração (substitui o 'fake-jwt-token-<id>')."""
-    return _serializer().dumps({'uid': user.id})
+    def __init__(self, secret_key, max_age):
+        self._serializer = URLSafeTimedSerializer(secret_key, salt=self._SALT)
+        self._max_age = max_age
 
+    def issue_token(self, user):
+        return self._serializer.dumps({'uid': user.id})
 
-def user_from_token(token):
-    try:
-        payload = _serializer().loads(token, max_age=current_app.config['TOKEN_MAX_AGE_SECONDS'])
-    except (BadSignature, SignatureExpired):
-        return None
-    user = db.session.get(User, payload.get('uid'))
-    return user if user and user.active else None
+    def user_id_from_token(self, token):
+        try:
+            payload = self._serializer.loads(token, max_age=self._max_age)
+        except BadSignature:  # inclui SignatureExpired
+            return None
+        user_id = payload.get('uid') if isinstance(payload, dict) else None
+        return user_id if isinstance(user_id, int) else None

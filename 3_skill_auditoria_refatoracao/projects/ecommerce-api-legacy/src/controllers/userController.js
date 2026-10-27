@@ -1,15 +1,14 @@
-const { notFound } = require('../errors');
-const { parseId } = require('./validators');
+const userModel = require('../models/userModel');
+const { NotFoundError } = require('../errors');
+const { parsePositiveInt } = require('./validation');
 
-function createUserController({ db, users, enrollments }) {
+function createUserController({ db }) {
     return {
-        async remove(rawId) {
-            const id = parseId(rawId);
-            await db.transaction(async (tx) => {
-                if (!(await users.anonymize(tx, id))) throw notFound('Usuário não encontrado');
-                await enrollments.audit(tx, `Usuário ${id} anonimizado`);
-            });
-            return { msg: 'Usuário removido; histórico financeiro preservado sem dados pessoais.' };
+        async remove(req, res) {
+            const id = parsePositiveInt(req.params.id);
+            const deleted = await db.transaction((tx) => userModel.deleteById(tx, id));
+            if (!deleted) throw new NotFoundError('Usuário não encontrado');
+            res.send('Usuário deletado, junto com suas matrículas e pagamentos.');
         },
     };
 }

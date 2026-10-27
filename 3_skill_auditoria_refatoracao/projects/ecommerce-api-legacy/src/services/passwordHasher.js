@@ -1,19 +1,22 @@
 const crypto = require('crypto');
+const { promisify } = require('util');
 
+const scrypt = promisify(crypto.scrypt);
+const SALT_BYTES = 16;
 const KEY_LENGTH = 64;
 
-function hashPassword(password) {
-    const salt = crypto.randomBytes(16).toString('hex');
-    const hash = crypto.scryptSync(password, salt, KEY_LENGTH).toString('hex');
-    return `scrypt$${salt}$${hash}`;
+async function hashPassword(password) {
+    const salt = crypto.randomBytes(SALT_BYTES).toString('hex');
+    const derived = await scrypt(password, salt, KEY_LENGTH);
+    return `scrypt$${salt}$${derived.toString('hex')}`;
 }
 
-function verifyPassword(password, stored) {
-    const [scheme, salt, hash] = String(stored || '').split('$');
+async function verifyPassword(password, stored) {
+    const [scheme, salt, hash] = String(stored).split('$');
     if (scheme !== 'scrypt' || !salt || !hash) return false;
+    const derived = await scrypt(password, salt, KEY_LENGTH);
     const expected = Buffer.from(hash, 'hex');
-    const actual = crypto.scryptSync(password, salt, expected.length);
-    return crypto.timingSafeEqual(expected, actual);
+    return expected.length === derived.length && crypto.timingSafeEqual(expected, derived);
 }
 
 module.exports = { hashPassword, verifyPassword };

@@ -7,34 +7,33 @@ WARNING: This is a development server. Do not use it in a production deployment.
 Press CTRL+C to quit
  * Restarting with stat
  * Debugger is active!
- * Debugger PIN: 141-939-064
-127.0.0.1 - - [26/Oct/2026 20:45:11] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "GET /tasks HTTP/1.1" 200 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "GET /tasks/1 HTTP/1.1" 200 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "GET /tasks/9999 HTTP/1.1" 404 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "GET /tasks/search?q=a HTTP/1.1" 200 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "GET /tasks/stats HTTP/1.1" 200 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "POST /tasks HTTP/1.1" 201 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "POST /tasks HTTP/1.1" 400 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "PUT /tasks/1 HTTP/1.1" 200 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "PUT /tasks/1 HTTP/1.1" 400 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "GET /users HTTP/1.1" 200 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "GET /users/1 HTTP/1.1" 200 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "GET /users/9999 HTTP/1.1" 404 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "POST /users HTTP/1.1" 201 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "POST /users HTTP/1.1" 400 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "GET /users/1/tasks HTTP/1.1" 200 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "POST /login HTTP/1.1" 200 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "POST /login HTTP/1.1" 401 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "PUT /users/2 HTTP/1.1" 200 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "POST /login HTTP/1.1" 200 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "PUT /users/2 HTTP/1.1" 200 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "GET /reports/summary HTTP/1.1" 200 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "GET /reports/user/1 HTTP/1.1" 200 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "GET /categories HTTP/1.1" 200 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "POST /categories HTTP/1.1" 201 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "PUT /categories/1 HTTP/1.1" 200 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "DELETE /tasks/2 HTTP/1.1" 200 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "DELETE /categories/4 HTTP/1.1" 200 -
-127.0.0.1 - - [26/Oct/2026 20:45:11] "DELETE /users/3 HTTP/1.1" 200 -
+ * Debugger PIN: 943-442-228
+127.0.0.1 - - [26/Oct/2026 22:27:50] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 22:27:50] "GET /health HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 22:27:50] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 22:27:50] "GET /tasks HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 22:27:50] "GET /tasks/1 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 22:27:50] "GET /tasks/9999 HTTP/1.1" 404 -
+127.0.0.1 - - [26/Oct/2026 22:27:50] "GET /tasks/search?q=a HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 22:27:50] "GET /tasks/stats HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 22:27:50] "POST /tasks HTTP/1.1" 201 -
+127.0.0.1 - - [26/Oct/2026 22:27:50] "POST /tasks HTTP/1.1" 400 -
+127.0.0.1 - - [26/Oct/2026 22:27:51] "PUT /tasks/1 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 22:27:51] "PUT /tasks/1 HTTP/1.1" 400 -
+127.0.0.1 - - [26/Oct/2026 22:27:51] "GET /users HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 22:27:51] "GET /users/1 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 22:27:51] "GET /users/9999 HTTP/1.1" 404 -
+127.0.0.1 - - [26/Oct/2026 22:27:51] "POST /users HTTP/1.1" 201 -
+127.0.0.1 - - [26/Oct/2026 22:27:51] "POST /users HTTP/1.1" 400 -
+127.0.0.1 - - [26/Oct/2026 22:27:51] "GET /users/1/tasks HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 22:27:51] "POST /login HTTP/1.1" 401 -
+127.0.0.1 - - [26/Oct/2026 22:27:51] "PUT /users/2 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 22:27:51] "PUT /users/2 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 22:27:51] "GET /reports/summary HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 22:27:51] "GET /reports/user/1 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 22:27:51] "GET /categories HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 22:27:51] "POST /categories HTTP/1.1" 201 -
+127.0.0.1 - - [26/Oct/2026 22:27:51] "PUT /categories/1 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 22:27:51] "DELETE /tasks/2 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 22:27:51] "DELETE /categories/4 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 22:27:51] "DELETE /users/3 HTTP/1.1" 200 -

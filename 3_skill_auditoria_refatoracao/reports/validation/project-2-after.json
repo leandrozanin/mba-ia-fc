@@ -5,6 +5,7 @@
     {
       "method": "POST",
       "path": "/api/checkout",
+      "auth": false,
       "status": 200,
       "keys": [
         "enrollment_id",
@@ -18,20 +19,15 @@
     {
       "method": "POST",
       "path": "/api/checkout",
+      "auth": false,
       "status": 400,
       "keys": "text",
-      "body": "Senha obrigatória para novo usuário"
+      "body": "Pagamento recusado"
     },
     {
       "method": "POST",
       "path": "/api/checkout",
-      "status": 400,
-      "keys": "text",
-      "body": "Senha obrigatória para novo usuário"
-    },
-    {
-      "method": "POST",
-      "path": "/api/checkout",
+      "auth": false,
       "status": 404,
       "keys": "text",
       "body": "Curso não encontrado"
@@ -39,6 +35,7 @@
     {
       "method": "POST",
       "path": "/api/checkout",
+      "auth": false,
       "status": 400,
       "keys": "text",
       "body": "Bad Request"
@@ -46,6 +43,7 @@
     {
       "method": "GET",
       "path": "/api/admin/financial-report",
+      "auth": true,
       "status": 200,
       "keys": "list",
       "body": [
@@ -73,28 +71,22 @@
     {
       "method": "DELETE",
       "path": "/api/users/1",
+      "auth": true,
       "status": 200,
-      "keys": [
-        "msg"
-      ],
-      "body": {
-        "msg": "Usuário removido; histórico financeiro preservado sem dados pessoais."
-      }
+      "keys": "text",
+      "body": "Usuário deletado, junto com suas matrículas e pagamentos."
     },
     {
       "method": "GET",
       "path": "/api/admin/financial-report",
+      "auth": true,
       "status": 200,
       "keys": "list",
       "body": [
         {
           "course": "Clean Architecture",
-          "revenue": 1994,
+          "revenue": 997,
           "students": [
-            {
-              "student": "Unknown",
-              "paid": 997
-            },
             {
               "student": "Smoke",
               "paid": 997
@@ -111,9 +103,10 @@
     {
       "method": "GET",
       "path": "/api/admin/financial-report",
+      "auth": false,
       "status": 401,
       "keys": "text",
-      "body": "Não autorizado"
+      "body": "Unauthorized"
     }
   ]
 }

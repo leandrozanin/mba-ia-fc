@@ -1,15 +1,16 @@
 # Auditoria e Refatoração Arquitetural com Claude Code
 
-Desafio 3: a skill `refactor-arch` analisa um projeto, gera um relatório de auditoria, pede aprovação e refatora o código para MVC, validando o resultado. Ela foi executada nos três projetos legados do [repositório base](https://github.com/devfullcycle/mba-ia-refactor-projects-skill) (commit `6d1ce6248c3e956801010a89d8bdaab48029bf30`).
+Desafio 3: a skill `refactor-arch` analisa um projeto, gera um relatório de auditoria, pede aprovação e refatora o código para MVC, validando o resultado. Ela foi executada com `claude "/refactor-arch"` dentro de cada um dos três projetos legados do [repositório base](https://github.com/devfullcycle/mba-ia-refactor-projects-skill) (commit `6d1ce6248c3e956801010a89d8bdaab48029bf30`). O código em `projects/` é a saída dessas execuções.
 
 | O quê | Onde |
 |---|---|
 | Skill (Claude Code) | `.claude/skills/refactor-arch/`, copiada para `projects/<projeto>/.claude/skills/refactor-arch/` |
 | Skill (Codex, espelho) | `.agents/skills/refactor-arch/` |
-| Código refatorado (resultado da Fase 3) | `projects/code-smells-project/`, `projects/ecommerce-api-legacy/`, `projects/task-manager-api/` |
+| Código refatorado pela skill (Fase 3) | `projects/code-smells-project/`, `projects/ecommerce-api-legacy/`, `projects/task-manager-api/` |
 | Código original dos projetos | tag git `original-projects` |
-| Relatórios da Fase 2 | `reports/audit-project-1.md`, `audit-project-2.md`, `audit-project-3.md` |
-| Evidências da Fase 3 | `reports/phase-3-validation.md` e `reports/validation/` |
+| Relatórios gerados pela skill (Fase 2) | `reports/audit-project-1.md`, `audit-project-2.md`, `audit-project-3.md` |
+| Saída de cada execução da skill | `reports/runs/project-1.md`, `project-2.md`, `project-3.md` |
+| Verificação independente da Fase 3 | `reports/phase-3-validation.md` e `reports/validation/` |
 
 ## Análise Manual
 
@@ -43,47 +44,48 @@ Desafio 3: a skill `refactor-arch` analisa um projeto, gera um relatório de aud
 - **LOW — estados/limites como literais**, `projects/task-manager-api/routes/task_routes.py:90-98` e `utils/helpers.py:65-70`: valores aparecem inline em validacoes.
 
 
+
 ## Construção da Skill
 
 ### Decisões de design
 
-- **`SKILL.md` é o procedimento; as referências são o conhecimento.** O `SKILL.md` descreve só as três fases, a ordem, o gate de aprovação e os limites ("não invente linhas, endpoints ou resultados"). O conhecimento de domínio fica em cinco arquivos Markdown carregados sob demanda:
+- **`SKILL.md` é o procedimento; as referências são o conhecimento.** O `SKILL.md` descreve só as três fases, a ordem, o gate de aprovação e os limites ("não invente linhas, endpoints ou resultados"). O conhecimento de domínio fica em cinco arquivos Markdown:
 
   | Área exigida | Arquivo |
   |---|---|
   | Análise de projeto | `references/project-analysis.md`: inventário de manifestos, heurísticas por stack, detecção de banco, mapeamento do fluxo de requisição |
   | Catálogo de anti-patterns | `references/anti-pattern-catalog.md`: 16 padrões (3 CRITICAL, 4 HIGH, 6 MEDIUM, 3 LOW) com sinais de detecção e regras de evidência |
-  | Template de relatório | `references/audit-report-template.md`: formato fixo, ordenação por severidade, seção de APIs deprecated e gate |
+  | Template de relatório | `references/audit-report-template.md`: formato fixo, ordenação por severidade, conferência das contagens, seção de APIs deprecated e gate |
   | Guidelines MVC | `references/mvc-guidelines.md`: responsabilidades das camadas, direção das dependências, mapeamento Flask/Express |
   | Playbook de refatoração | `references/refactoring-playbook.md`: 10 transformações com código antes/depois |
 
 - **Gate explícito.** A Fase 2 termina com "Aprovar a Fase 3? (sim/não)" e o `SKILL.md` proíbe alterar código, configuração ou dados antes da aprovação.
-- **Validação baseada em evidência.** A Fase 3 exige baseline antes de mexer, testes novos para o que mudou, boot e chamadas reais aos endpoints originais, e proíbe declarar algo resolvido sem verificar.
-- **Uma skill, várias cópias idênticas.** A cópia da raiz é a fonte; cada projeto tem uma cópia em `.claude/skills/refactor-arch/` para funcionar com `cd <projeto> && claude "/refactor-arch"`. O teste `tests/test_skill_assets.py` falha se alguma cópia divergir.
+- **Validação baseada em evidência.** A Fase 3 exige baseline antes de mexer, testes para o que mudou, boot e chamadas reais aos endpoints originais, e proíbe declarar algo resolvido sem verificar.
+- **Uma skill, cópias idênticas.** A cópia da raiz é a fonte. Cada projeto tem uma cópia em `.claude/skills/refactor-arch/`, e o teste `tests/test_skill_assets.py` falha se alguma divergir.
 
 ### Anti-patterns do catálogo e por quê
 
 Os padrões saíram da análise manual: cada problema encontrado virou um sinal de detecção acionável.
 
-- **Segurança (CRITICAL):** segredos embutidos, SQL injection/execução arbitrária e God class. Apareceram nos três projetos e são o maior risco.
-- **Arquitetura (HIGH):** regra de negócio no handler, estado global/acoplamento rígido, persistência na camada de apresentação e falta de transação. São as violações de MVC/SOLID que impedem teste e evolução.
+- **Segurança (CRITICAL):** segredos embutidos, SQL injection/execução arbitrária e God class, presentes nos três projetos.
+- **Arquitetura (HIGH):** regra de negócio no handler, estado global/acoplamento rígido, persistência na camada de apresentação e falta de transação.
 - **Qualidade (MEDIUM):** N+1, validação duplicada, falta de validação, erro opaco e **APIs deprecated**. Este último exige referência à documentação da versão em uso, como `datetime.utcnow()` no Python 3.12+ e `Query.get()` no SQLAlchemy 2.x.
 - **Legibilidade (LOW):** magic values, código morto e logging improvisado.
 
 ### Como a skill é agnóstica de tecnologia
 
-- A detecção parte de evidência do repositório (manifestos, imports, registro de rotas), não de suposições. A tabela de heurísticas cobre Flask, Django, Express, NestJS, Java e Go.
+- A detecção parte de evidência do repositório (manifestos, imports, registro de rotas), não de suposições. As heurísticas cobrem Flask, Django, Express, NestJS, Java e Go.
 - Os sinais do catálogo descrevem comportamento ("consulta dentro de loop", "segredo literal versionado"), não sintaxe de uma linguagem.
 - As guidelines definem a separação conceitual e pedem o mecanismo idiomático da stack: Blueprints + `create_app` no Flask, Router + composition root no Express.
 - A regra "arquitetura organizada ainda pode ter problemas" fez a skill auditar o comportamento do projeto 3, e não só os nomes das pastas.
 
 ### Desafios encontrados
 
-- **Contratos HTTP.** Refatorar sem quebrar clientes exigiu um roteiro de smoke test reproduzível (`scripts/smoke_test.py`) executado antes e depois, comparando status e formato das respostas.
-- **Segurança x compatibilidade.** Algumas correções mudam contrato de propósito: remover `senha` das respostas, exigir token em rotas admin, remover `/admin/query`. Cada mudança está justificada por um achado e documentada no README do projeto.
-- **Express 4 + callbacks.** O `sqlite3` usa callbacks e o Express 4 não captura rejeições de handlers async. A solução foi um wrapper com Promises, transações enfileiradas sobre a conexão única e um adaptador `handle()` que encaminha erros ao middleware central.
-- **Ambiente Windows.** O reloader do Flask em debug cria um processo filho, e o smoke test passou a encerrar a árvore inteira. O npm 11 bloqueia scripts de instalação, mas o binário pré-compilado do `sqlite3` funcionou.
-- **Evidências sem segredos.** Os logs do baseline repetiam a chave do gateway e cartões completos, e foram mascarados antes do commit.
+- **Provar a execução real.** Uma primeira rodada foi feita na mesma sessão em que a skill foi escrita, sem o gate humano. Para a entrega, a skill rodou do zero em sessões novas do Claude Code: as Fases 1 e 2 pararam no gate, os relatórios foram revisados e só então a Fase 3 foi aprovada. As saídas estão em `reports/runs/`.
+- **Iteração no template.** No projeto 1, a skill escreveu HIGH = 6 no resumo, mas o relatório tinha 5 blocos HIGH. A contagem foi corrigida, com nota no relatório, e o template ganhou uma regra para conferir o resumo contra os blocos.
+- **Achado refutado na Fase 3.** No projeto 3, o baseline mostrou que "excluir categoria deixa tasks órfãs" era falso, porque o SQLAlchemy zera o `category_id`. A skill removeu o achado e registrou uma errata no relatório.
+- **Segurança x compatibilidade.** Corrigir a falta de autenticação muda o contrato: rotas sensíveis passam a responder 401 sem token. O smoke test faz login e envia token para comprovar que, autenticados, todos os endpoints originais funcionam.
+- **Ambiente Windows.** O reloader do Flask em debug cria processo filho, e o smoke test encerra a árvore inteira. Caminhos longos impediram o worktree no diretório temporário. Os logs do baseline repetiam segredos e cartões e foram mascarados.
 
 ## Resultados
 
@@ -91,61 +93,58 @@ Os padrões saíram da análise manual: cada problema encontrado virou um sinal 
 
 | Projeto | Stack detectada | Domínio | Arquivos | CRITICAL | HIGH | MEDIUM | LOW | Total |
 |---|---|---|---:|---:|---:|---:|---:|---:|
-| 1 — code-smells-project | Python 3.12 / Flask 3.1.1 + sqlite3 | E-commerce (produtos, usuários, pedidos) | 4 | 4 | 5 | 5 | 3 | **17** |
-| 2 — ecommerce-api-legacy | Node.js / Express 4.22 + sqlite3 | LMS com checkout de cursos | 3 | 2 | 6 | 4 | 3 | **15** |
-| 3 — task-manager-api | Python 3.12 / Flask 3.0 + Flask-SQLAlchemy 3.1 | Task Manager (tasks, usuários, categorias, relatórios) | 15 | 2 | 4 | 6 | 3 | **15** |
+| 1 — code-smells-project | Python 3.12 / Flask 3.1.1 + sqlite3 | E-commerce (produtos, usuários, pedidos) | 4 | 4 | 5 | 4 | 4 | **17** |
+| 2 — ecommerce-api-legacy | Node.js / Express 4.22 + sqlite3 | LMS com checkout de cursos | 3 | 3 | 5 | 4 | 3 | **15** |
+| 3 — task-manager-api | Python 3.12 / Flask 3.0 + Flask-SQLAlchemy 3.1 | Task Manager (tasks, usuários, categorias, relatórios) | 15 | 3 | 4 | 7 | 4 | **18** |
 
-Todos os relatórios têm arquivo:linha em cada achado, ordem CRITICAL → LOW, seção de APIs deprecated e gate de aprovação. As APIs deprecated foram encontradas no projeto 3; nos projetos 1 e 2 a checagem está registrada, sem ocorrências.
+Todos os relatórios têm arquivo:linha em cada achado, ordem CRITICAL → LOW, seção de APIs deprecated e gate de aprovação. Houve APIs deprecated apenas no projeto 3 (`Query.get()`, `datetime.utcnow()`); nos outros a checagem está registrada, sem ocorrências.
 
 ### Estrutura antes/depois
 
 **Projeto 1 — code-smells-project**
 
 ```
-ANTES                         DEPOIS
-app.py  (config + rotas +     app.py                       composition root (create_app)
-         SQL admin)           config/settings.py           configuração por ambiente
-controllers.py                errors.py                    erros de aplicação
-models.py (4 domínios, SQL    models/database.py           conexão por request, schema, seed
-           concatenado)       models/{produto,usuario,pedido}_model.py
-database.py (conexão global)  controllers/{produto,usuario,pedido,relatorio,sistema}_controller.py
-                              controllers/validators.py
-                              views/routes.py              Blueprint HTTP
-                              middlewares/error_handler.py
-                              services/notification_service.py
-                              tests/test_api.py
+ANTES                              DEPOIS
+app.py  (config + rotas + SQL      app.py                    entry point
+         admin)                    loja/__init__.py          create_app (composition root)
+controllers.py                     loja/config.py            configuração por ambiente
+models.py (4 domínios, SQL         loja/db.py                conexão por request, schema, migração de senhas
+           concatenado)            loja/models/              produto, usuario, pedido (SQL parametrizado)
+database.py (conexão global)       loja/controllers/         produtos, usuarios, pedidos, relatorios, sistema
+                                   loja/routes/              Blueprints HTTP
+                                   loja/errors.py            erros + handlers centralizados
+                                   loja/auth.py, permissoes.py, validators.py, notificacoes.py
+                                   tests/test_api.py
 ```
 
 **Projeto 2 — ecommerce-api-legacy**
 
 ```
-ANTES                         DEPOIS
-src/app.js                    src/app.js                   composition root (createApp)
-src/AppManager.js (God Class: src/config/{index,logger}.js
-  DB + rotas + checkout +     src/errors.js
-  relatório)                  src/db/{database,seed}.js    Promises + transações
-src/utils.js (segredos,       src/models/{user,course,enrollment}Model.js
-  cache global, "hash")       src/controllers/{checkout,report,user}Controller.js + validators.js
-                              src/services/{paymentGateway,passwordHasher}.js
-                              src/views/routes.js          Router Express
-                              src/middlewares/{adminAuth,errorHandler}.js
-                              test/api.test.js
+ANTES                              DEPOIS
+src/app.js                         src/app.js                composition root
+src/AppManager.js (God Class:      src/config/index.js       configuração por ambiente (ADMIN_TOKEN obrigatório)
+  DB + rotas + checkout +          src/db/database.js, schema.js
+  relatório)                       src/models/               user, course, enrollment, payment, auditLog
+src/utils.js (segredos, cache      src/services/             checkout, report, paymentGateway, passwordHasher
+  global, "hash")                  src/controllers/          checkout, report, user + validation
+                                   src/routes/index.js       Router Express
+                                   src/middlewares/          adminAuth, errorHandler
+                                   test/api.test.js
 ```
 
 **Projeto 3 — task-manager-api** (já tinha camadas nominais; a skill completou o MVC)
 
 ```
-ANTES                         DEPOIS
-app.py (config fixa,          app.py                       create_app()
-        create_all no import) config/settings.py           ambiente + .env
-models/ (MD5, utcnow)         models/                      hash com salt, regra is_overdue única, sem utcnow
-routes/ (rotas gordas:        controllers/{task,user,report,category}_controller.py + validators.py
-  regra + ORM + N+1)          routes/{task,user,report,category,system}_routes.py   rotas finas
-services/ (sem uso,           middlewares/{auth,error_handler}.py
-  SMTP fixo)                  services/{auth_service,notification_service}.py
-utils/helpers.py (código      utils/{constants,dates}.py
-  morto)                      errors.py, tests/test_api.py
-seed.py (apaga tudo)          seed.py                      idempotente; --reset explícito
+ANTES                              DEPOIS
+app.py (config fixa,               app.py                    create_app + handlers de erro
+        create_all no import)      config.py                 configuração por ambiente
+models/ (MD5, utcnow, Query.get)   models/                   hash com salt, regra de atraso única, constants.py
+routes/ (rotas gordas:             controllers/              task, user, category, report, auth + validation, errors
+  regra + ORM + N+1)               routes/                   Blueprints finos + auth.py, serializers.py, system/category
+services/ (sem uso, SMTP fixo)     services/                 auth_service (token assinado), notification_service (config)
+utils/helpers.py                   utils/helpers.py          utc_now e utilitários usados
+seed.py                            seed.py                   usa create_app
+                                   tests/                    test_security, test_tasks, test_users_reports_categories
 ```
 
 ### Checklist de validação
@@ -159,48 +158,48 @@ seed.py (apaga tudo)          seed.py                      idempotente; --reset 
 | **Fase 2** — segue o template | [x] | [x] | [x] |
 | Arquivo e linhas exatos | [x] | [x] | [x] |
 | Ordenado CRITICAL → LOW | [x] | [x] | [x] |
-| Mínimo de 5 findings | [x] 17 | [x] 15 | [x] 15 |
+| Mínimo de 5 findings | [x] 17 | [x] 15 | [x] 18 |
 | APIs deprecated (se aplicável) | [x] checado, nenhuma | [x] checado, nenhuma | [x] `utcnow()`, `Query.get()` |
 | Pausa e pede confirmação | [x] | [x] | [x] |
 | **Fase 3** — estrutura MVC | [x] | [x] | [x] |
-| Config extraída (sem hardcoded) | [x] `config/settings.py` | [x] `src/config/` | [x] `config/settings.py` |
-| Models abstraem dados | [x] `models/` | [x] `src/models/` | [x] `models/` |
-| Views/Routes separadas | [x] `views/routes.py` | [x] `src/views/routes.js` | [x] `routes/` |
-| Controllers concentram o fluxo | [x] `controllers/` | [x] `src/controllers/` | [x] `controllers/` |
-| Error handling centralizado | [x] `middlewares/error_handler.py` | [x] `src/middlewares/errorHandler.js` | [x] `middlewares/error_handler.py` |
+| Config extraída (sem hardcoded) | [x] `loja/config.py` | [x] `src/config/index.js` | [x] `config.py` |
+| Models abstraem dados | [x] `loja/models/` | [x] `src/models/` | [x] `models/` |
+| Views/Routes separadas | [x] `loja/routes/` | [x] `src/routes/` | [x] `routes/` |
+| Controllers concentram o fluxo | [x] `loja/controllers/` | [x] `src/controllers/` + `src/services/` | [x] `controllers/` |
+| Error handling centralizado | [x] `loja/errors.py` | [x] `src/middlewares/errorHandler.js` | [x] handlers em `app.py` |
 | Entry point claro | [x] `app.py` | [x] `src/app.js` | [x] `app.py` |
 | Aplicação inicia sem erros | [x] | [x] | [x] |
-| Endpoints originais respondem | [x] 22/24 iguais, 2 bloqueios intencionais | [x] 8/9 iguais, 1 bloqueio intencional | [x] 29/30 iguais, 1 bloqueio intencional |
-| Testes automatizados | [x] 17/17 | [x] 10/10 | [x] 16/16 |
+| Endpoints originais respondem | [x] 21/25 iguais; demais intencionais | [x] 7/8 iguais; 1 intencional | [x] 28/29 iguais; 1 intencional |
+| Testes automatizados (criados pela skill) | [x] 30/30 | [x] 12/12 | [x] 53/53 |
 
 ### Logs da aplicação rodando após a refatoração
 
-As tabelas completas de antes/depois estão em [`reports/phase-3-validation.md`](reports/phase-3-validation.md), e os logs do servidor em `reports/validation/project-N-after.server.log`. Trechos:
+As tabelas completas estão em [`reports/phase-3-validation.md`](reports/phase-3-validation.md), e os logs em `reports/validation/project-N-after.server.log`. Trechos:
 
 ```text
 # Projeto 1 (python app.py)
-INFO __main__: Servidor em http://127.0.0.1:5000
+INFO loja.db: Usuário administrador inicial criado
  * Debug mode: off
-INFO werkzeug: 127.0.0.1 - - "GET /produtos HTTP/1.1" 200 -
-INFO werkzeug: 127.0.0.1 - - "POST /pedidos HTTP/1.1" 201 -
-INFO werkzeug: 127.0.0.1 - - "POST /admin/query HTTP/1.1" 404 -
+"GET /usuarios HTTP/1.1" 200 -     (com token de admin)
+"POST /pedidos HTTP/1.1" 201 -
+"GET /usuarios HTTP/1.1" 401 -     (sem token)
 
-# Projeto 2 (npm start)
-INFO LMS API rodando na porta 3000
-INFO Pagamento PAID para curso 1 (cartão final 1111)
+# Projeto 2 (ADMIN_TOKEN=... npm start)
+LMS API rodando na porta 3000...
 
 # Projeto 3 (python seed.py && python app.py)
-INFO werkzeug: 127.0.0.1 - - "GET /tasks HTTP/1.1" 200 -
-INFO werkzeug: 127.0.0.1 - - "PUT /users/2 HTTP/1.1" 401 -
-INFO werkzeug: 127.0.0.1 - - "DELETE /categories/4 HTTP/1.1" 200 -
+ * Running on http://127.0.0.1:5000
+"POST /tasks HTTP/1.1" 201 -
+"PUT /users/2 HTTP/1.1" 401 -      (anônimo tentando virar admin)
+"PUT /users/2 HTTP/1.1" 200 -      (com token)
 ```
 
 ### Comportamento da skill em stacks diferentes
 
-- **Monólito Python (projeto 1):** foi a maior transformação. Quatro arquivos planos viraram camadas por domínio, e a correção de SQL injection foi aplicada em todas as queries de uma vez, porque passaram a existir só nos models.
-- **Monólito Node.js (projeto 2):** o catálogo encontrou os mesmos padrões em sintaxe diferente: segredo em objeto `config`, God Class, N+1 em callbacks aninhados. As guidelines levaram a soluções idiomáticas do Express (Router, middleware de erro, factory com injeção do gateway de pagamento).
-- **Projeto parcialmente organizado (projeto 3):** a skill não tratou as pastas existentes como prova de boa arquitetura. Apontou rotas gordas, N+1, MD5, token falso e APIs deprecated, preservou a estrutura que já fazia sentido (`models/`, `routes/`, `services/`) e adicionou a camada de controllers.
-- **Limitações registradas:** `npm audit` no projeto 2 aponta vulnerabilidades transitivas que exigem `sqlite3@6` (breaking); no projeto 3, a escrita de tasks continua pública, como no original.
+- **Monólito Python (projeto 1):** foi a maior transformação. Quatro arquivos planos viraram um pacote `loja/` com camadas por domínio, e o SQL injection foi corrigido em todas as queries porque elas passaram a existir só nos models. A skill também tratou a falta de autenticação com tokens e papéis.
+- **Monólito Node.js (projeto 2):** os mesmos padrões apareceram em sintaxe diferente: segredo em objeto `config`, God Class, N+1 em callbacks aninhados. As guidelines levaram a soluções idiomáticas do Express. No gate, a skill perguntou como tratar a autenticação admin antes de decidir.
+- **Projeto parcialmente organizado (projeto 3):** a skill não tratou as pastas existentes como prova de boa arquitetura. Encontrou rotas gordas, N+1, MD5, token falso e APIs deprecated, manteve a estrutura que fazia sentido e adicionou controllers. No baseline da Fase 3, refutou um achado da própria auditoria.
+- **Pontos de atenção:** a conferência de contagens do relatório, que levou ao ajuste do template, e as limitações que a skill declarou sem esconder, listadas em `reports/phase-3-validation.md`.
 
 ## Como Executar
 
@@ -209,43 +208,43 @@ INFO werkzeug: 127.0.0.1 - - "DELETE /categories/4 HTTP/1.1" 200 -
 - [Claude Code](https://docs.claude.com/en/docs/claude-code/overview) instalado e autenticado (ou Codex CLI, que usa `.agents/skills/`).
 - Python 3.12+ para os projetos 1 e 3; Node.js 22+ para o projeto 2.
 
+### Executar a skill num projeto original
+
+O código original está na tag `original-projects`. Para rodar a skill do zero sem mexer na entrega, use um worktree num caminho curto, porque o Windows limita o tamanho dos caminhos:
+
+```bash
+git worktree add ../refactor-arch-original original-projects
+cd ../refactor-arch-original/3_skill_auditoria_refatoracao/projects/code-smells-project
+mkdir -p .claude/skills && cp -r ../../.claude/skills/refactor-arch .claude/skills/
+claude "/refactor-arch"
+```
+
+A skill imprime a análise (Fase 1), gera o relatório e **para pedindo aprovação** (Fase 2). Só depois de responder "sim" ela refatora e valida (Fase 3). Repita em `../ecommerce-api-legacy` e `../task-manager-api`.
+
 ### Validar o código refatorado (estado atual)
 
 ```bash
 # Projeto 1
 cd projects/code-smells-project
-python -m venv .venv && .venv/Scripts/pip install -r requirements.txt   # Linux/macOS: .venv/bin/pip
-.venv/Scripts/python -m unittest discover -s tests -v
-SECRET_KEY=dev .venv/Scripts/python app.py
+pip install -r requirements.txt
+python -m unittest discover -s tests -t . -v
+SECRET_KEY=<valor-longo> ADMIN_EMAIL=admin@loja.com ADMIN_PASSWORD=<senha-forte> python app.py
 
 # Projeto 2
 cd projects/ecommerce-api-legacy
 npm install && npm test
-ADMIN_API_TOKEN=dev-token npm start
+ADMIN_TOKEN=<token> npm start
 
 # Projeto 3
 cd projects/task-manager-api
-python -m venv .venv && .venv/Scripts/pip install -r requirements.txt
-.venv/Scripts/python -m unittest discover -s tests -v
-.venv/Scripts/python seed.py && .venv/Scripts/python app.py
+pip install -r requirements.txt
+python -m unittest discover -s tests -t .
+SECRET_KEY=<valor-longo> python seed.py && SECRET_KEY=<valor-longo> python app.py
 
-# Smoke test comparando com o baseline do código original (na raiz)
+# Smoke test dos endpoints originais (na raiz, com dependências de cada projeto em .venv/node_modules)
 python scripts/smoke_test.py task-manager-api reports/validation/project-3-after.json
 python scripts/smoke_test.py --compare reports/validation/project-3-baseline.json reports/validation/project-3-after.json
 ```
-
-### Executar a skill do zero num projeto original
-
-O código original está preservado na tag `original-projects`. Para rodar a skill desde o início sem perder o resultado entregue, use um worktree:
-
-```bash
-git worktree add ../refactor-arch-original original-projects
-cd ../refactor-arch-original/3_skill_auditoria_refatoracao/projects/code-smells-project
-mkdir -p .claude/skills && cp -r ../../.claude/skills/refactor-arch .claude/skills/   # a tag é anterior às cópias
-claude "/refactor-arch"
-```
-
-A skill imprime a análise (Fase 1), gera o relatório e **para pedindo aprovação** (Fase 2). Só depois de responder "sim" ela refatora e valida (Fase 3). Repita para `../ecommerce-api-legacy` e `../task-manager-api`.
 
 ### Ordem sugerida
 

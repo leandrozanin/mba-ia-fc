@@ -1,19 +1,21 @@
 const crypto = require('crypto');
-const { forbidden, unauthorized } = require('../errors');
+const { UnauthorizedError } = require('../errors');
 
-function tokensMatch(expected, received) {
-    const a = Buffer.from(expected);
-    const b = Buffer.from(String(received || ''));
-    return a.length === b.length && crypto.timingSafeEqual(a, b);
+function digest(value) {
+    return crypto.createHash('sha256').update(value).digest();
 }
 
-/** Protege rotas administrativas com o token configurado em ADMIN_API_TOKEN. */
-function adminAuth(adminApiToken) {
+// Exige "Authorization: Bearer <ADMIN_TOKEN>"; compara em tempo constante.
+function createAdminAuth({ adminToken }) {
+    const expected = digest(adminToken);
+
     return (req, res, next) => {
-        if (!adminApiToken) return next(forbidden('Rotas administrativas desabilitadas'));
-        if (!tokensMatch(adminApiToken, req.get('x-admin-token'))) return next(unauthorized());
-        return next();
+        const match = /^Bearer (.+)$/.exec(req.get('authorization') || '');
+        if (!match || !crypto.timingSafeEqual(digest(match[1]), expected)) {
+            return next(new UnauthorizedError());
+        }
+        next();
     };
 }
 
-module.exports = { adminAuth };
+module.exports = { createAdminAuth };

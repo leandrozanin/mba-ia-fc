@@ -2,107 +2,118 @@ import logging
 
 from sqlalchemy import func
 
-from controllers.validators import require_body, validate_user
+from controllers.errors import ConflictError, ForbiddenError, NotFoundError, ValidationError, commit
+from controllers.validation import (
+    require_payload,
+    validate_bool,
+    validate_email,
+    validate_name,
+    validate_password,
+    validate_role,
+)
 from database import db
-from errors import ConflictError, ForbiddenError, NotFoundError, UnauthorizedError, ValidationError
+from models.constants import DEFAULT_ROLE
 from models.task import Task
 from models.user import User
-from services.auth_service import issue_token
-from utils.constants import ROLE_USER
 
 logger = logging.getLogger(__name__)
 
 
 def get_user_or_404(user_id):
     user = db.session.get(User, user_id)
-    if user is None:
+    if not user:
         raise NotFoundError('Usuário não encontrado')
     return user
 
 
-def _email_taken(email, except_id=None):
-    existing = db.session.scalar(db.select(User).where(User.email == email))
-    return existing is not None and existing.id != except_id
-
-
-def list_users():
-    counts = dict(db.session.execute(db.select(Task.user_id, func.count(Task.id)).group_by(Task.user_id)).all())
-    users = db.session.scalars(db.select(User).order_by(User.id))
-    return [{**user.to_dict(), 'task_count': counts.get(user.id, 0)} for user in users]
-
-
-def get_user(user_id):
-    user = get_user_or_404(user_id)
-    tasks = db.session.scalars(db.select(Task).where(Task.user_id == user_id).order_by(Task.id))
-    return {**user.to_dict(), 'tasks': [task.to_dict() for task in tasks]}
-
-
-def create_user(data, actor=None):
-    fields = validate_user(data)
-    if _email_taken(fields['email']):
-        raise ConflictError('Email já cadastrado')
-
-    role = fields.get('role', ROLE_USER)
-    if role != ROLE_USER and not (actor and actor.is_admin()):
-        raise ForbiddenError('Apenas admin pode definir role')
-
-    user = User(name=fields['name'], email=fields['email'], role=role)
-    user.set_password(fields['password'])
-    db.session.add(user)
-    db.session.commit()
-    logger.info('Usuário criado: id=%s', user.id)
-    return user.to_dict()
-
-
-def update_user(user_id, data, actor):
-    user = get_user_or_404(user_id)
-    fields = validate_user(data, partial=True)
-
-    if not actor.is_admin():
-        if actor.id != user.id:
-            raise ForbiddenError('Permissão insuficiente')
-        if 'role' in fields or 'active' in fields:
-            raise ForbiddenError('Apenas admin pode alterar role ou active')
-
-    if 'email' in fields and _email_taken(fields['email'], except_id=user.id):
-        raise ConflictError('Email já cadastrado')
-    if 'password' in fields:
-        user.set_password(fields.pop('password'))
-    for field, value in fields.items():
-        setattr(user, field, value)
-
-    db.session.commit()
-    return user.to_dict()
-
-
-def delete_user(user_id):
-    user = get_user_or_404(user_id)
-    # Mantém a regra original: as tasks do usuário saem junto, na mesma transação.
-    db.session.execute(db.delete(Task).where(Task.user_id == user_id))
-    db.session.delete(user)
-    db.session.commit()
-    logger.info('Usuário deletado: id=%s', user_id)
+def list_users_with_task_count():
+    counts = dict(
+        db.session.query(Task.user_id, func.count(Task.id))
+        .filter(Task.user_id.isnot(None))
+        .group_by(Task.user_id)
+        .all()
+    )
+    return [(user, counts.get(user.id, 0)) for user in User.query.order_by(User.id).all()]
 
 
 def get_user_tasks(user_id):
     get_user_or_404(user_id)
-    tasks = db.session.scalars(db.select(Task).where(Task.user_id == user_id).order_by(Task.id))
-    return [task.to_summary_dict() for task in tasks]
+    return Task.query.filter_by(user_id=user_id).order_by(Task.id).all()
 
 
-def login(data):
-    require_body(data)
-    email, password = data.get('email'), data.get('password')
-    if not email or not password:
-        raise ValidationError('Email e senha são obrigatórios')
-    if not isinstance(email, str) or not isinstance(password, str):
-        raise ValidationError('Dados inválidos')
+def _ensure_email_available(email, user_id=None):
+    existing = User.query.filter_by(email=email).first()
+    if existing and existing.id != user_id:
+        raise ConflictError('Email já cadastrado')
 
-    user = db.session.scalar(db.select(User).where(User.email == email))
-    if user is None or not user.check_password(password):
-        raise UnauthorizedError('Credenciais inválidas')
-    if not user.active:
-        raise ForbiddenError('Usuário inativo')
 
-    db.session.commit()  # persiste o rehash de senhas MD5 legadas
-    return {'message': 'Login realizado com sucesso', 'user': user.to_dict(), 'token': issue_token(user)}
+def create_user(data, current_user=None):
+    require_payload(data)
+
+    name = data.get('name')
+    email = data.get('email')
+    password = data.get('password')
+    role = data.get('role', DEFAULT_ROLE)
+
+    if not name:
+        raise ValidationError('Nome é obrigatório')
+    if not email:
+        raise ValidationError('Email é obrigatório')
+    if not password:
+        raise ValidationError('Senha é obrigatória')
+    validate_name(name)
+    validate_email(email)
+    validate_password(password)
+    _ensure_email_available(email)
+    validate_role(role)
+    if role != DEFAULT_ROLE and not (current_user and current_user.is_admin()):
+        raise ForbiddenError('Apenas administradores podem atribuir este papel')
+
+    user = User(name=name, email=email, role=role)
+    user.set_password(password)
+    db.session.add(user)
+    commit('Erro ao criar usuário')
+    logger.info('Usuário criado: id=%s', user.id)
+    return user
+
+
+def update_user(user_id, data, current_user):
+    user = get_user_or_404(user_id)
+    is_admin = current_user.is_admin()
+    if not is_admin and current_user.id != user.id:
+        raise ForbiddenError('Acesso negado')
+    require_payload(data)
+
+    if ('role' in data or 'active' in data) and not is_admin:
+        raise ForbiddenError('Apenas administradores podem alterar papel ou status')
+
+    changes = {}
+    if 'name' in data:
+        changes['name'] = validate_name(data['name'])
+    if 'email' in data:
+        changes['email'] = validate_email(data['email'])
+        _ensure_email_available(data['email'], user.id)
+    if 'password' in data:
+        validate_password(data['password'], 'Senha muito curta')
+    if 'role' in data:
+        changes['role'] = validate_role(data['role'])
+    if 'active' in data:
+        changes['active'] = validate_bool(data['active'], 'active')
+
+    for field, value in changes.items():
+        setattr(user, field, value)
+    if 'password' in data:
+        user.set_password(data['password'])
+
+    commit('Erro ao atualizar')
+    logger.info('Usuário atualizado: id=%s', user.id)
+    return user
+
+
+def delete_user(user_id):
+    user = get_user_or_404(user_id)
+    # Tarefas e usuário saem na mesma transação.
+    Task.query.filter_by(user_id=user_id).delete(synchronize_session='fetch')
+    db.session.delete(user)
+    commit('Erro ao deletar')
+    logger.info('Usuário deletado: id=%s', user_id)

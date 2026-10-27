@@ -37,4 +37,4 @@ Use este formato em cada execução. Troque placeholders por evidência observad
 A auditoria não alterou o código-alvo. Aprovar a Fase 3? (sim/não)
 ```
 
-Ordene os blocos de achados em CRITICAL → HIGH → MEDIUM → LOW. Linhas são 1-based; confira no arquivo atual após qualquer alteração. Não inclua valores de credenciais nos achados: registre apenas que há segredo embutido e sua localização.
+Antes de salvar, conte os blocos `### [SEVERIDADE]` e confira que cada linha do Resumo e o Total batem com essa contagem; ao juntar ou separar achados, atualize o Resumo. Ordene os blocos de achados em CRITICAL → HIGH → MEDIUM → LOW. Linhas são 1-based; confira no arquivo atual após qualquer alteração. Não inclua valores de credenciais nos achados: registre apenas que há segredo embutido e sua localização.

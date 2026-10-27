@@ -1,6 +1,6 @@
 from database import db
-from utils.constants import DEFAULT_COLOR
-from utils.dates import utcnow
+from models.constants import DEFAULT_COLOR
+from utils.helpers import utc_now
 
 
 class Category(db.Model):
@@ -10,9 +10,7 @@ class Category(db.Model):
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(300), nullable=True)
     color = db.Column(db.String(7), default=DEFAULT_COLOR)
-    created_at = db.Column(db.DateTime, default=utcnow)
-
-    tasks = db.relationship('Task', back_populates='category')
+    created_at = db.Column(db.DateTime, default=utc_now)
 
     def to_dict(self):
         return {

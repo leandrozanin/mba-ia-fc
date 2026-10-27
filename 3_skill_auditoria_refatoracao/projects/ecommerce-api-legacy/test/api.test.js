@@ -1,26 +1,21 @@
-process.env.LOG_LEVEL = 'silent';
-
 const { test, beforeEach, afterEach } = require('node:test');
 const assert = require('node:assert/strict');
-const { createApp } = require('../src/app');
+const { createApp, createDatabase } = require('../src/app');
+const { loadConfig } = require('../src/config');
+const { verifyPassword } = require('../src/services/passwordHasher');
 
-const ADMIN = { 'x-admin-token': 'test-admin-token' };
-let server;
+const ADMIN_TOKEN = 'test-admin-token';
+const auth = { authorization: `Bearer ${ADMIN_TOKEN}` };
+const validCheckout = { usr: 'Guilherme', eml: 'gui@fullcycle.com.br', pwd: 'senhaforte', c_id: 2, card: '4111222233334444' };
+
 let db;
+let server;
 let baseUrl;
 
 beforeEach(async () => {
-    const created = await createApp({
-        config: {
-            port: 0,
-            databaseFile: ':memory:',
-            paymentGatewayKey: 'test',
-            adminApiToken: ADMIN['x-admin-token'],
-            seedUserPassword: 'senha-demo',
-        },
-    });
-    db = created.db;
-    server = created.app.listen(0);
+    db = await createDatabase(':memory:');
+    const app = createApp({ db, config: loadConfig({ ADMIN_TOKEN }) });
+    server = app.listen(0);
     await new Promise((resolve) => server.once('listening', resolve));
     baseUrl = `http://127.0.0.1:${server.address().port}`;
 });
@@ -30,95 +25,119 @@ afterEach(async () => {
     await db.close();
 });
 
-async function request(method, path, body, headers = {}) {
+async function request(method, path, { body, headers = {}, raw } = {}) {
     const res = await fetch(baseUrl + path, {
         method,
         headers: { 'content-type': 'application/json', ...headers },
-        body: body === undefined ? undefined : JSON.stringify(body),
+        body: raw ?? (body && JSON.stringify(body)),
     });
     const text = await res.text();
-    let data = text;
-    try { data = JSON.parse(text); } catch { /* resposta em texto */ }
-    return { status: res.status, data };
+    const isJson = (res.headers.get('content-type') || '').includes('application/json');
+    return { status: res.status, body: isJson ? JSON.parse(text) : text };
 }
 
-const checkout = (overrides = {}) => request('POST', '/api/checkout', {
-    usr: 'Ana', eml: 'ana@teste.com', pwd: 'senha-ana', c_id: 2, card: '4111111111111111', ...overrides,
+const count = async (table) => (await db.get(`SELECT COUNT(*) AS n FROM ${table}`)).n;
+
+test('config exige ADMIN_TOKEN', () => {
+    assert.throws(() => loadConfig({}), /ADMIN_TOKEN/);
+    assert.equal(loadConfig({ ADMIN_TOKEN: 'x' }).port, 3000);
 });
 
-const count = async (table) => (await db.get(`SELECT COUNT(*) AS total FROM ${table}`)).total;
-
-test('checkout aprovado cria matrícula, pagamento e auditoria', async () => {
-    const res = await checkout();
+test('checkout com sucesso mantém o contrato e persiste tudo', async () => {
+    const res = await request('POST', '/api/checkout', { body: validCheckout });
     assert.equal(res.status, 200);
-    assert.equal(res.data.msg, 'Sucesso');
+    assert.deepEqual(res.body, { msg: 'Sucesso', enrollment_id: 2 });
     assert.equal(await count('payments'), 2);
     assert.equal(await count('audit_logs'), 1);
-});
 
-test('senha é armazenada com hash scrypt', async () => {
-    await checkout();
-    const user = await db.get("SELECT pass FROM users WHERE email = 'ana@teste.com'");
+    const user = await db.get("SELECT pass FROM users WHERE email = ?", [validCheckout.eml]);
     assert.match(user.pass, /^scrypt\$/);
+    assert.equal(await verifyPassword('senhaforte', user.pass), true);
+    assert.equal(await verifyPassword('senhafraca', user.pass), false);
 });
 
-test('pagamento recusado não deixa usuário nem matrícula', async () => {
-    const res = await checkout({ card: '5111111111111111' });
-    assert.equal(res.status, 400);
-    assert.equal(res.data, 'Pagamento recusado');
-    assert.equal(await count('users'), 1);
-    assert.equal(await count('enrollments'), 1);
-});
-
-test('payload malformado retorna 400 em vez de derrubar o processo', async () => {
-    assert.equal((await checkout({ card: 4111111111111111 })).status, 400);
-    assert.equal((await checkout({ c_id: 'abc' })).status, 400);
-    assert.equal((await checkout({ eml: 'sem-arroba' })).status, 400);
-    assert.equal((await request('POST', '/api/checkout', { usr: 'x' })).status, 400);
-    assert.equal((await checkout()).status, 200);
-});
-
-test('novo usuário sem senha é recusado', async () => {
-    assert.equal((await checkout({ pwd: undefined })).status, 400);
-});
-
-test('usuário existente precisa da senha correta e não compra duas vezes', async () => {
-    assert.equal((await checkout()).status, 200);
-    assert.equal((await checkout({ pwd: 'errada', c_id: 1 })).status, 401);
-    assert.equal((await checkout()).status, 409);
-    assert.equal((await checkout({ c_id: 1 })).status, 200);
-});
-
-test('falha no meio do checkout faz rollback', async () => {
-    await db.run('DROP TABLE audit_logs');
-    assert.equal((await checkout()).status, 500);
-    assert.equal(await count('users'), 1);
-    assert.equal(await count('enrollments'), 1);
-});
-
-test('rotas admin exigem token', async () => {
-    assert.equal((await request('GET', '/api/admin/financial-report')).status, 401);
-    assert.equal((await request('DELETE', '/api/users/1', undefined, { 'x-admin-token': 'errado' })).status, 401);
-});
-
-test('relatório financeiro agrega receita por curso sem N+1', async () => {
-    await checkout({ c_id: 1 });
-    const res = await request('GET', '/api/admin/financial-report', undefined, ADMIN);
+test('checkout de usuário existente reutiliza o usuário sem exigir senha', async () => {
+    const res = await request('POST', '/api/checkout', {
+        body: { usr: 'Leonan', eml: 'leonan@fullcycle.com.br', c_id: 2, card: '4111222233334444' },
+    });
     assert.equal(res.status, 200);
-    assert.deepEqual(res.data, [
-        { course: 'Clean Architecture', revenue: 1994, students: [{ student: 'Leonan', paid: 997 }, { student: 'Ana', paid: 997 }] },
-        { course: 'Docker', revenue: 0, students: [] },
+    assert.equal(await count('users'), 1);
+});
+
+test('pagamento recusado não cria usuário nem matrícula', async () => {
+    const res = await request('POST', '/api/checkout', { body: { ...validCheckout, card: '5111222233334444' } });
+    assert.deepEqual(res, { status: 400, body: 'Pagamento recusado' });
+    assert.equal(await count('users'), 1);
+    assert.equal(await count('enrollments'), 1);
+});
+
+test('curso inexistente retorna 404', async () => {
+    const res = await request('POST', '/api/checkout', { body: { ...validCheckout, c_id: 99 } });
+    assert.deepEqual(res, { status: 404, body: 'Curso não encontrado' });
+});
+
+test('entrada inválida retorna 400 sem derrubar o servidor', async () => {
+    const invalid = [
+        { usr: 'X', eml: 'x@x.com' },
+        { ...validCheckout, card: 4111222233334444 },
+        { ...validCheckout, card: '4111' },
+        { ...validCheckout, eml: 'sem-arroba' },
+        { ...validCheckout, c_id: 'abc' },
+        { ...validCheckout, pwd: undefined, eml: 'novo@teste.com' },
+    ];
+    for (const body of invalid) {
+        assert.deepEqual(await request('POST', '/api/checkout', { body }), { status: 400, body: 'Bad Request' });
+    }
+    assert.deepEqual(await request('POST', '/api/checkout', { raw: '{nope' }), { status: 400, body: 'Bad Request' });
+    assert.equal((await request('POST', '/api/checkout', { body: validCheckout })).status, 200);
+});
+
+test('falha intermediária faz rollback do checkout', async () => {
+    await db.exec('DROP TABLE audit_logs');
+    const res = await request('POST', '/api/checkout', { body: validCheckout });
+    assert.equal(res.status, 500);
+    assert.equal(await count('users'), 1);
+    assert.equal(await count('enrollments'), 1);
+    assert.equal(await count('payments'), 1);
+});
+
+test('rotas administrativas exigem o token de admin', async () => {
+    for (const headers of [{}, { authorization: 'Bearer errado' }, { authorization: ADMIN_TOKEN }]) {
+        assert.deepEqual(await request('GET', '/api/admin/financial-report', { headers }), { status: 401, body: 'Unauthorized' });
+        assert.deepEqual(await request('DELETE', '/api/users/1', { headers }), { status: 401, body: 'Unauthorized' });
+    }
+    assert.equal(await count('users'), 1);
+});
+
+test('relatório financeiro mantém o formato e agrega com pagamento', async () => {
+    await request('POST', '/api/checkout', { body: validCheckout });
+    const res = await request('GET', '/api/admin/financial-report', { headers: auth });
+    assert.equal(res.status, 200);
+    assert.deepEqual(res.body, [
+        { course: 'Clean Architecture', revenue: 997, students: [{ student: 'Leonan', paid: 997 }] },
+        { course: 'Docker', revenue: 497, students: [{ student: 'Guilherme', paid: 497 }] },
     ]);
 });
 
-test('excluir usuário anonimiza dados e preserva histórico', async () => {
-    const res = await request('DELETE', '/api/users/1', undefined, ADMIN);
+test('exclusão de usuário remove matrículas e pagamentos', async () => {
+    const res = await request('DELETE', '/api/users/1', { headers: auth });
     assert.equal(res.status, 200);
-    const user = await db.get('SELECT name, email, pass FROM users WHERE id = 1');
-    assert.deepEqual({ ...user }, { name: null, email: null, pass: null });
-    assert.equal(await count('payments'), 1);
-    assert.equal((await request('DELETE', '/api/users/1', undefined, ADMIN)).status, 404);
+    assert.equal(await count('enrollments'), 0);
+    assert.equal(await count('payments'), 0);
 
-    const report = await request('GET', '/api/admin/financial-report', undefined, ADMIN);
-    assert.equal(report.data[0].students[0].student, 'Unknown');
+    const report = await request('GET', '/api/admin/financial-report', { headers: auth });
+    assert.deepEqual(report.body[0], { course: 'Clean Architecture', revenue: 0, students: [] });
+});
+
+test('exclusão de usuário inexistente ou id inválido', async () => {
+    assert.deepEqual(await request('DELETE', '/api/users/999', { headers: auth }), { status: 404, body: 'Usuário não encontrado' });
+    assert.deepEqual(await request('DELETE', '/api/users/abc', { headers: auth }), { status: 400, body: 'Bad Request' });
+});
+
+test('checkouts concorrentes não colidem nas transações', async () => {
+    const results = await Promise.all([1, 2, 3, 4, 5].map((i) =>
+        request('POST', '/api/checkout', { body: { ...validCheckout, eml: `user${i}@teste.com` } })));
+    assert.ok(results.every((r) => r.status === 200));
+    assert.equal(await count('payments'), 6);
+    assert.equal(await count('audit_logs'), 5);
 });

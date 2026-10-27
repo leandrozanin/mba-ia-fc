@@ -5,6 +5,7 @@
     {
       "method": "GET",
       "path": "/",
+      "auth": false,
       "status": 200,
       "keys": [
         "message",
@@ -18,6 +19,7 @@
     {
       "method": "GET",
       "path": "/health",
+      "auth": false,
       "status": 200,
       "keys": [
         "status",
@@ -25,51 +27,76 @@
       ],
       "body": {
         "status": "ok",
-        "timestamp": "2026-10-26 20:45:11.127121"
+        "timestamp": "2026-10-26 22:27:50.664284"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/login",
+      "auth": false,
+      "status": 200,
+      "keys": [
+        "message",
+        "token",
+        "user"
+      ],
+      "body": {
+        "message": "Login realizado com sucesso",
+        "token": "fake-jwt-token-1",
+        "user": {
+          "active": true,
+          "created_at": "2026-10-27 01:27:45.989817",
+          "email": "joao@email.com",
+          "id": 1,
+          "name": "João Silva",
+          "password": "81dc9bdb52d04dc20036dbd8313ed055",
+          "role": "admin"
+        }
       }
     },
     {
       "method": "GET",
       "path": "/tasks",
+      "auth": false,
       "status": 200,
       "keys": "list",
       "body": [
         {
           "category_id": 1,
           "category_name": "Backend",
-          "created_at": "2026-10-26 23:45:07.745311",
+          "created_at": "2026-10-27 01:27:46.013326",
           "description": "Adicionar autenticação real com JWT",
-          "due_date": "2026-10-23 23:45:07.732032",
+          "due_date": "2026-10-24 01:27:46.007732",
           "id": 1,
           "overdue": true,
           "priority": 1,
           "status": "pending",
           "tags": [],
           "title": "Implementar autenticação JWT",
-          "updated_at": "2026-10-26 23:45:07.745311",
+          "updated_at": "2026-10-27 01:27:46.013326",
           "user_id": 1,
           "user_name": "João Silva"
         },
         {
           "category_id": 2,
           "category_name": "Frontend",
-          "created_at": "2026-10-26 23:45:07.745311",
+          "created_at": "2026-10-27 01:27:46.013326",
           "description": "Tela de login responsiva",
-          "due_date": "2026-10-31 23:45:07.735570",
+          "due_date": "2026-11-01 01:27:46.009279",
           "id": 2,
           "overdue": false,
           "priority": 2,
           "status": "in_progress",
           "tags": [],
           "title": "Criar tela de login",
-          "updated_at": "2026-10-26 23:45:07.745311",
+          "updated_at": "2026-10-27 01:27:46.013326",
           "user_id": 2,
           "user_name": "Maria Santos"
         },
         {
           "category_id": 3,
           "category_name": "DevOps",
-          "created_at": "2026-10-26 23:45:07.745311",
+          "created_at": "2026-10-27 01:27:46.013326",
           "description": "Pipeline com GitHub Actions",
           "due_date": null,
           "id": 3,
@@ -82,46 +109,46 @@
             "github"
           ],
           "title": "Configurar CI/CD",
-          "updated_at": "2026-10-26 23:45:07.745311",
+          "updated_at": "2026-10-27 01:27:46.013326",
           "user_id": 3,
           "user_name": "Pedro Oliveira"
         },
         {
           "category_id": 4,
           "category_name": "Bug",
-          "created_at": "2026-10-26 23:45:07.745311",
+          "created_at": "2026-10-27 01:27:46.013326",
           "description": "Filtro não funciona com caracteres especiais",
-          "due_date": "2026-10-25 23:45:07.738585",
+          "due_date": "2026-10-26 01:27:46.010326",
           "id": 4,
           "overdue": true,
           "priority": 1,
           "status": "pending",
           "tags": [],
           "title": "Corrigir bug no filtro de busca",
-          "updated_at": "2026-10-26 23:45:07.745311",
+          "updated_at": "2026-10-27 01:27:46.013326",
           "user_id": 1,
           "user_name": "João Silva"
         },
         {
           "category_id": 1,
           "category_name": "Backend",
-          "created_at": "2026-10-26 23:45:07.745311",
+          "created_at": "2026-10-27 01:27:46.013326",
           "description": "Endpoints retornam todos os registros",
-          "due_date": "2026-11-05 23:45:07.739076",
+          "due_date": "2026-11-06 01:27:46.010326",
           "id": 5,
           "overdue": false,
           "priority": 3,
           "status": "pending",
           "tags": [],
           "title": "Adicionar paginação na API",
-          "updated_at": "2026-10-26 23:45:07.745311",
+          "updated_at": "2026-10-27 01:27:46.013326",
           "user_id": 1,
           "user_name": "João Silva"
         },
         {
           "category_id": 1,
           "category_name": "Backend",
-          "created_at": "2026-10-26 23:45:07.745311",
+          "created_at": "2026-10-27 01:27:46.013326",
           "description": "Cobertura mínima de 80%",
           "due_date": null,
           "id": 6,
@@ -130,14 +157,14 @@
           "status": "pending",
           "tags": [],
           "title": "Escrever testes unitários",
-          "updated_at": "2026-10-26 23:45:07.745311",
+          "updated_at": "2026-10-27 01:27:46.013326",
           "user_id": 2,
           "user_name": "Maria Santos"
         },
         {
           "category_id": 1,
           "category_name": "Backend",
-          "created_at": "2026-10-26 23:45:07.745311",
+          "created_at": "2026-10-27 01:27:46.013326",
           "description": "Gerar documentação automática",
           "due_date": null,
           "id": 7,
@@ -146,14 +173,14 @@
           "status": "cancelled",
           "tags": [],
           "title": "Documentar API com Swagger",
-          "updated_at": "2026-10-26 23:45:07.745311",
+          "updated_at": "2026-10-27 01:27:46.013326",
           "user_id": 3,
           "user_name": "Pedro Oliveira"
         },
         {
           "category_id": 1,
           "category_name": "Backend",
-          "created_at": "2026-10-26 23:45:07.745311",
+          "created_at": "2026-10-27 01:27:46.013326",
           "description": "Melhorar organização dos models",
           "due_date": null,
           "id": 8,
@@ -165,30 +192,30 @@
             "tech-debt"
           ],
           "title": "Refatorar models",
-          "updated_at": "2026-10-26 23:45:07.745311",
+          "updated_at": "2026-10-27 01:27:46.013326",
           "user_id": 2,
           "user_name": "Maria Santos"
         },
         {
           "category_id": 3,
           "category_name": "DevOps",
-          "created_at": "2026-10-26 23:45:07.745311",
+          "created_at": "2026-10-27 01:27:46.013326",
           "description": "Prometheus + Grafana",
-          "due_date": "2026-11-15 23:45:07.739076",
+          "due_date": "2026-11-16 01:27:46.010326",
           "id": 9,
           "overdue": false,
           "priority": 4,
           "status": "pending",
           "tags": [],
           "title": "Configurar monitoramento",
-          "updated_at": "2026-10-26 23:45:07.745311",
+          "updated_at": "2026-10-27 01:27:46.013326",
           "user_id": 3,
           "user_name": "Pedro Oliveira"
         },
         {
           "category_id": 1,
           "category_name": "Backend",
-          "created_at": "2026-10-26 23:45:07.745311",
+          "created_at": "2026-10-27 01:27:46.013326",
           "description": "Usar marshmallow ou pydantic",
           "due_date": null,
           "id": 10,
@@ -200,7 +227,7 @@
             "validation"
           ],
           "title": "Melhorar validações de input",
-          "updated_at": "2026-10-26 23:45:07.745311",
+          "updated_at": "2026-10-27 01:27:46.013326",
           "user_id": 1,
           "user_name": "João Silva"
         }
@@ -209,6 +236,7 @@
     {
       "method": "GET",
       "path": "/tasks/1",
+      "auth": false,
       "status": 200,
       "keys": [
         "category_id",
@@ -226,22 +254,23 @@
       ],
       "body": {
         "category_id": 1,
-        "created_at": "2026-10-26 23:45:07.745311",
+        "created_at": "2026-10-27 01:27:46.013326",
         "description": "Adicionar autenticação real com JWT",
-        "due_date": "2026-10-23 23:45:07.732032",
+        "due_date": "2026-10-24 01:27:46.007732",
         "id": 1,
         "overdue": true,
         "priority": 1,
         "status": "pending",
         "tags": [],
         "title": "Implementar autenticação JWT",
-        "updated_at": "2026-10-26 23:45:07.745311",
+        "updated_at": "2026-10-27 01:27:46.013326",
         "user_id": 1
       }
     },
     {
       "method": "GET",
       "path": "/tasks/9999",
+      "auth": false,
       "status": 404,
       "keys": [
         "error"
@@ -253,38 +282,39 @@
     {
       "method": "GET",
       "path": "/tasks/search?q=a",
+      "auth": false,
       "status": 200,
       "keys": "list",
       "body": [
         {
           "category_id": 1,
-          "created_at": "2026-10-26 23:45:07.745311",
+          "created_at": "2026-10-27 01:27:46.013326",
           "description": "Adicionar autenticação real com JWT",
-          "due_date": "2026-10-23 23:45:07.732032",
+          "due_date": "2026-10-24 01:27:46.007732",
           "id": 1,
           "priority": 1,
           "status": "pending",
           "tags": [],
           "title": "Implementar autenticação JWT",
-          "updated_at": "2026-10-26 23:45:07.745311",
+          "updated_at": "2026-10-27 01:27:46.013326",
           "user_id": 1
         },
         {
           "category_id": 2,
-          "created_at": "2026-10-26 23:45:07.745311",
+          "created_at": "2026-10-27 01:27:46.013326",
           "description": "Tela de login responsiva",
-          "due_date": "2026-10-31 23:45:07.735570",
+          "due_date": "2026-11-01 01:27:46.009279",
           "id": 2,
           "priority": 2,
           "status": "in_progress",
           "tags": [],
           "title": "Criar tela de login",
-          "updated_at": "2026-10-26 23:45:07.745311",
+          "updated_at": "2026-10-27 01:27:46.013326",
           "user_id": 2
         },
         {
           "category_id": 3,
-          "created_at": "2026-10-26 23:45:07.745311",
+          "created_at": "2026-10-27 01:27:46.013326",
           "description": "Pipeline com GitHub Actions",
           "due_date": null,
           "id": 3,
@@ -296,38 +326,38 @@
             "github"
           ],
           "title": "Configurar CI/CD",
-          "updated_at": "2026-10-26 23:45:07.745311",
+          "updated_at": "2026-10-27 01:27:46.013326",
           "user_id": 3
         },
         {
           "category_id": 4,
-          "created_at": "2026-10-26 23:45:07.745311",
+          "created_at": "2026-10-27 01:27:46.013326",
           "description": "Filtro não funciona com caracteres especiais",
-          "due_date": "2026-10-25 23:45:07.738585",
+          "due_date": "2026-10-26 01:27:46.010326",
           "id": 4,
           "priority": 1,
           "status": "pending",
           "tags": [],
           "title": "Corrigir bug no filtro de busca",
-          "updated_at": "2026-10-26 23:45:07.745311",
+          "updated_at": "2026-10-27 01:27:46.013326",
           "user_id": 1
         },
         {
           "category_id": 1,
-          "created_at": "2026-10-26 23:45:07.745311",
+          "created_at": "2026-10-27 01:27:46.013326",
           "description": "Endpoints retornam todos os registros",
-          "due_date": "2026-11-05 23:45:07.739076",
+          "due_date": "2026-11-06 01:27:46.010326",
           "id": 5,
           "priority": 3,
           "status": "pending",
           "tags": [],
           "title": "Adicionar paginação na API",
-          "updated_at": "2026-10-26 23:45:07.745311",
+          "updated_at": "2026-10-27 01:27:46.013326",
           "user_id": 1
         },
         {
           "category_id": 1,
-          "created_at": "2026-10-26 23:45:07.745311",
+          "created_at": "2026-10-27 01:27:46.013326",
           "description": "Cobertura mínima de 80%",
           "due_date": null,
           "id": 6,
@@ -335,12 +365,12 @@
           "status": "pending",
           "tags": [],
           "title": "Escrever testes unitários",
-          "updated_at": "2026-10-26 23:45:07.745311",
+          "updated_at": "2026-10-27 01:27:46.013326",
           "user_id": 2
         },
         {
           "category_id": 1,
-          "created_at": "2026-10-26 23:45:07.745311",
+          "created_at": "2026-10-27 01:27:46.013326",
           "description": "Gerar documentação automática",
           "due_date": null,
           "id": 7,
@@ -348,12 +378,12 @@
           "status": "cancelled",
           "tags": [],
           "title": "Documentar API com Swagger",
-          "updated_at": "2026-10-26 23:45:07.745311",
+          "updated_at": "2026-10-27 01:27:46.013326",
           "user_id": 3
         },
         {
           "category_id": 1,
-          "created_at": "2026-10-26 23:45:07.745311",
+          "created_at": "2026-10-27 01:27:46.013326",
           "description": "Melhorar organização dos models",
           "due_date": null,
           "id": 8,
@@ -364,25 +394,25 @@
             "tech-debt"
           ],
           "title": "Refatorar models",
-          "updated_at": "2026-10-26 23:45:07.745311",
+          "updated_at": "2026-10-27 01:27:46.013326",
           "user_id": 2
         },
         {
           "category_id": 3,
-          "created_at": "2026-10-26 23:45:07.745311",
+          "created_at": "2026-10-27 01:27:46.013326",
           "description": "Prometheus + Grafana",
-          "due_date": "2026-11-15 23:45:07.739076",
+          "due_date": "2026-11-16 01:27:46.010326",
           "id": 9,
           "priority": 4,
           "status": "pending",
           "tags": [],
           "title": "Configurar monitoramento",
-          "updated_at": "2026-10-26 23:45:07.745311",
+          "updated_at": "2026-10-27 01:27:46.013326",
           "user_id": 3
         },
         {
           "category_id": 1,
-          "created_at": "2026-10-26 23:45:07.745311",
+          "created_at": "2026-10-27 01:27:46.013326",
           "description": "Usar marshmallow ou pydantic",
           "due_date": null,
           "id": 10,
@@ -393,7 +423,7 @@
             "validation"
           ],
           "title": "Melhorar validações de input",
-          "updated_at": "2026-10-26 23:45:07.745311",
+          "updated_at": "2026-10-27 01:27:46.013326",
           "user_id": 1
         }
       ]
@@ -401,6 +431,7 @@
     {
       "method": "GET",
       "path": "/tasks/stats",
+      "auth": false,
       "status": 200,
       "keys": [
         "cancelled",
@@ -424,6 +455,7 @@
     {
       "method": "POST",
       "path": "/tasks",
+      "auth": true,
       "status": 201,
       "keys": [
         "category_id",
@@ -440,7 +472,7 @@
       ],
       "body": {
         "category_id": 1,
-        "created_at": "2026-10-26 23:45:11.232718",
+        "created_at": "2026-10-27 01:27:50.959748",
         "description": "teste",
         "due_date": null,
         "id": 11,
@@ -450,13 +482,14 @@
           "smoke"
         ],
         "title": "Task smoke",
-        "updated_at": "2026-10-26 23:45:11.232718",
+        "updated_at": "2026-10-27 01:27:50.959748",
         "user_id": 1
       }
     },
     {
       "method": "POST",
       "path": "/tasks",
+      "auth": true,
       "status": 400,
       "keys": [
         "error"
@@ -468,6 +501,7 @@
     {
       "method": "PUT",
       "path": "/tasks/1",
+      "auth": true,
       "status": 200,
       "keys": [
         "category_id",
@@ -484,21 +518,22 @@
       ],
       "body": {
         "category_id": 1,
-        "created_at": "2026-10-26 23:45:07.745311",
+        "created_at": "2026-10-27 01:27:46.013326",
         "description": "Adicionar autenticação real com JWT",
-        "due_date": "2026-10-23 23:45:07.732032",
+        "due_date": "2026-10-24 01:27:46.007732",
         "id": 1,
         "priority": 1,
         "status": "in_progress",
         "tags": [],
         "title": "Implementar autenticação JWT",
-        "updated_at": "2026-10-26 23:45:11.255781",
+        "updated_at": "2026-10-27 01:27:51.003305",
         "user_id": 1
       }
     },
     {
       "method": "PUT",
       "path": "/tasks/1",
+      "auth": true,
       "status": 400,
       "keys": [
         "error"
@@ -510,12 +545,13 @@
     {
       "method": "GET",
       "path": "/users",
+      "auth": false,
       "status": 200,
       "keys": "list",
       "body": [
         {
           "active": true,
-          "created_at": "2026-10-26 23:45:07.525097",
+          "created_at": "2026-10-27 01:27:45.989817",
           "email": "joao@email.com",
           "id": 1,
           "name": "João Silva",
@@ -524,7 +560,7 @@
         },
         {
           "active": true,
-          "created_at": "2026-10-26 23:45:07.525097",
+          "created_at": "2026-10-27 01:27:45.989817",
           "email": "maria@email.com",
           "id": 2,
           "name": "Maria Santos",
@@ -533,7 +569,7 @@
         },
         {
           "active": true,
-          "created_at": "2026-10-26 23:45:07.525097",
+          "created_at": "2026-10-27 01:27:45.989817",
           "email": "pedro@email.com",
           "id": 3,
           "name": "Pedro Oliveira",
@@ -545,6 +581,7 @@
     {
       "method": "GET",
       "path": "/users/1",
+      "auth": false,
       "status": 200,
       "keys": [
         "active",
@@ -558,7 +595,7 @@
       ],
       "body": {
         "active": true,
-        "created_at": "2026-10-26 23:45:07.525097",
+        "created_at": "2026-10-27 01:27:45.989817",
         "email": "joao@email.com",
         "id": 1,
         "name": "João Silva",
@@ -567,46 +604,46 @@
         "tasks": [
           {
             "category_id": 1,
-            "created_at": "2026-10-26 23:45:07.745311",
+            "created_at": "2026-10-27 01:27:46.013326",
             "description": "Adicionar autenticação real com JWT",
-            "due_date": "2026-10-23 23:45:07.732032",
+            "due_date": "2026-10-24 01:27:46.007732",
             "id": 1,
             "priority": 1,
             "status": "in_progress",
             "tags": [],
             "title": "Implementar autenticação JWT",
-            "updated_at": "2026-10-26 23:45:11.255781",
+            "updated_at": "2026-10-27 01:27:51.003305",
             "user_id": 1
           },
           {
             "category_id": 4,
-            "created_at": "2026-10-26 23:45:07.745311",
+            "created_at": "2026-10-27 01:27:46.013326",
             "description": "Filtro não funciona com caracteres especiais",
-            "due_date": "2026-10-25 23:45:07.738585",
+            "due_date": "2026-10-26 01:27:46.010326",
             "id": 4,
             "priority": 1,
             "status": "pending",
             "tags": [],
             "title": "Corrigir bug no filtro de busca",
-            "updated_at": "2026-10-26 23:45:07.745311",
+            "updated_at": "2026-10-27 01:27:46.013326",
             "user_id": 1
           },
           {
             "category_id": 1,
-            "created_at": "2026-10-26 23:45:07.745311",
+            "created_at": "2026-10-27 01:27:46.013326",
             "description": "Endpoints retornam todos os registros",
-            "due_date": "2026-11-05 23:45:07.739076",
+            "due_date": "2026-11-06 01:27:46.010326",
             "id": 5,
             "priority": 3,
             "status": "pending",
             "tags": [],
             "title": "Adicionar paginação na API",
-            "updated_at": "2026-10-26 23:45:07.745311",
+            "updated_at": "2026-10-27 01:27:46.013326",
             "user_id": 1
           },
           {
             "category_id": 1,
-            "created_at": "2026-10-26 23:45:07.745311",
+            "created_at": "2026-10-27 01:27:46.013326",
             "description": "Usar marshmallow ou pydantic",
             "due_date": null,
             "id": 10,
@@ -617,12 +654,12 @@
               "validation"
             ],
             "title": "Melhorar validações de input",
-            "updated_at": "2026-10-26 23:45:07.745311",
+            "updated_at": "2026-10-27 01:27:46.013326",
             "user_id": 1
           },
           {
             "category_id": 1,
-            "created_at": "2026-10-26 23:45:11.232718",
+            "created_at": "2026-10-27 01:27:50.959748",
             "description": "teste",
             "due_date": null,
             "id": 11,
@@ -632,7 +669,7 @@
               "smoke"
             ],
             "title": "Task smoke",
-            "updated_at": "2026-10-26 23:45:11.232718",
+            "updated_at": "2026-10-27 01:27:50.959748",
             "user_id": 1
           }
         ]
@@ -641,6 +678,7 @@
     {
       "method": "GET",
       "path": "/users/9999",
+      "auth": false,
       "status": 404,
       "keys": [
         "error"
@@ -652,6 +690,7 @@
     {
       "method": "POST",
       "path": "/users",
+      "auth": false,
       "status": 201,
       "keys": [
         "active",
@@ -664,7 +703,7 @@
       ],
       "body": {
         "active": true,
-        "created_at": "2026-10-26 23:45:11.314487",
+        "created_at": "2026-10-27 01:27:51.089502",
         "email": "smoke@teste.com",
         "id": 4,
         "name": "Smoke",
@@ -675,6 +714,7 @@
     {
       "method": "POST",
       "path": "/users",
+      "auth": false,
       "status": 400,
       "keys": [
         "error"
@@ -686,13 +726,14 @@
     {
       "method": "GET",
       "path": "/users/1/tasks",
+      "auth": false,
       "status": 200,
       "keys": "list",
       "body": [
         {
-          "created_at": "2026-10-26 23:45:07.745311",
+          "created_at": "2026-10-27 01:27:46.013326",
           "description": "Adicionar autenticação real com JWT",
-          "due_date": "2026-10-23 23:45:07.732032",
+          "due_date": "2026-10-24 01:27:46.007732",
           "id": 1,
           "overdue": true,
           "priority": 1,
@@ -700,9 +741,9 @@
           "title": "Implementar autenticação JWT"
         },
         {
-          "created_at": "2026-10-26 23:45:07.745311",
+          "created_at": "2026-10-27 01:27:46.013326",
           "description": "Filtro não funciona com caracteres especiais",
-          "due_date": "2026-10-25 23:45:07.738585",
+          "due_date": "2026-10-26 01:27:46.010326",
           "id": 4,
           "overdue": true,
           "priority": 1,
@@ -710,9 +751,9 @@
           "title": "Corrigir bug no filtro de busca"
         },
         {
-          "created_at": "2026-10-26 23:45:07.745311",
+          "created_at": "2026-10-27 01:27:46.013326",
           "description": "Endpoints retornam todos os registros",
-          "due_date": "2026-11-05 23:45:07.739076",
+          "due_date": "2026-11-06 01:27:46.010326",
           "id": 5,
           "overdue": false,
           "priority": 3,
@@ -720,7 +761,7 @@
           "title": "Adicionar paginação na API"
         },
         {
-          "created_at": "2026-10-26 23:45:07.745311",
+          "created_at": "2026-10-27 01:27:46.013326",
           "description": "Usar marshmallow ou pydantic",
           "due_date": null,
           "id": 10,
@@ -730,7 +771,7 @@
           "title": "Melhorar validações de input"
         },
         {
-          "created_at": "2026-10-26 23:45:11.232718",
+          "created_at": "2026-10-27 01:27:50.959748",
           "description": "teste",
           "due_date": null,
           "id": 11,
@@ -744,29 +785,7 @@
     {
       "method": "POST",
       "path": "/login",
-      "status": 200,
-      "keys": [
-        "message",
-        "token",
-        "user"
-      ],
-      "body": {
-        "message": "Login realizado com sucesso",
-        "token": "fake-jwt-token-4",
-        "user": {
-          "active": true,
-          "created_at": "2026-10-26 23:45:11.314487",
-          "email": "smoke@teste.com",
-          "id": 4,
-          "name": "Smoke",
-          "password": "2b5c50925dd0df1d1e0cde0144617f84",
-          "role": "user"
-        }
-      }
-    },
-    {
-      "method": "POST",
-      "path": "/login",
+      "auth": false,
       "status": 401,
       "keys": [
         "error"
@@ -778,6 +797,7 @@
     {
       "method": "PUT",
       "path": "/users/2",
+      "auth": false,
       "status": 200,
       "keys": [
         "active",
@@ -790,7 +810,7 @@
       ],
       "body": {
         "active": true,
-        "created_at": "2026-10-26 23:45:07.525097",
+        "created_at": "2026-10-27 01:27:45.989817",
         "email": "maria@email.com",
         "id": 2,
         "name": "Maria Santos",
@@ -799,31 +819,9 @@
       }
     },
     {
-      "method": "POST",
-      "path": "/login",
-      "status": 200,
-      "keys": [
-        "message",
-        "token",
-        "user"
-      ],
-      "body": {
-        "message": "Login realizado com sucesso",
-        "token": "fake-jwt-token-1",
-        "user": {
-          "active": true,
-          "created_at": "2026-10-26 23:45:07.525097",
-          "email": "joao@email.com",
-          "id": 1,
-          "name": "João Silva",
-          "password": "81dc9bdb52d04dc20036dbd8313ed055",
-          "role": "admin"
-        }
-      }
-    },
-    {
       "method": "PUT",
       "path": "/users/2",
+      "auth": true,
       "status": 200,
       "keys": [
         "active",
@@ -836,7 +834,7 @@
       ],
       "body": {
         "active": true,
-        "created_at": "2026-10-26 23:45:07.525097",
+        "created_at": "2026-10-27 01:27:45.989817",
         "email": "maria@email.com",
         "id": 2,
         "name": "Nome Atualizado",
@@ -847,6 +845,7 @@
     {
       "method": "GET",
       "path": "/reports/summary",
+      "auth": false,
       "status": 200,
       "keys": [
         "generated_at",
@@ -858,19 +857,19 @@
         "user_productivity"
       ],
       "body": {
-        "generated_at": "2026-10-26 23:45:11.419276",
+        "generated_at": "2026-10-27 01:27:51.276855",
         "overdue": {
           "count": 2,
           "tasks": [
             {
               "days_overdue": 3,
-              "due_date": "2026-10-23 23:45:07.732032",
+              "due_date": "2026-10-24 01:27:46.007732",
               "id": 1,
               "title": "Implementar autenticação JWT"
             },
             {
               "days_overdue": 1,
-              "due_date": "2026-10-25 23:45:07.738585",
+              "due_date": "2026-10-26 01:27:46.010326",
               "id": 4,
               "title": "Corrigir bug no filtro de busca"
             }
@@ -933,6 +932,7 @@
     {
       "method": "GET",
       "path": "/reports/user/1",
+      "auth": false,
       "status": 200,
       "keys": [
         "statistics",
@@ -959,12 +959,13 @@
     {
       "method": "GET",
       "path": "/categories",
+      "auth": false,
       "status": 200,
       "keys": "list",
       "body": [
         {
           "color": "#3498db",
-          "created_at": "2026-10-26 23:45:07.707676",
+          "created_at": "2026-10-27 01:27:45.997269",
           "description": "Tarefas de backend",
           "id": 1,
           "name": "Backend",
@@ -972,7 +973,7 @@
         },
         {
           "color": "#2ecc71",
-          "created_at": "2026-10-26 23:45:07.707676",
+          "created_at": "2026-10-27 01:27:45.997269",
           "description": "Tarefas de frontend",
           "id": 2,
           "name": "Frontend",
@@ -980,7 +981,7 @@
         },
         {
           "color": "#e74c3c",
-          "created_at": "2026-10-26 23:45:07.707676",
+          "created_at": "2026-10-27 01:27:45.997269",
           "description": "Tarefas de infraestrutura",
           "id": 3,
           "name": "DevOps",
@@ -988,7 +989,7 @@
         },
         {
           "color": "#e67e22",
-          "created_at": "2026-10-26 23:45:07.707676",
+          "created_at": "2026-10-27 01:27:45.997269",
           "description": "Correção de bugs",
           "id": 4,
           "name": "Bug",
@@ -999,6 +1000,7 @@
     {
       "method": "POST",
       "path": "/categories",
+      "auth": true,
       "status": 201,
       "keys": [
         "color",
@@ -1009,7 +1011,7 @@
       ],
       "body": {
         "color": "#123456",
-        "created_at": "2026-10-26 23:45:11.456351",
+        "created_at": "2026-10-27 01:27:51.354315",
         "description": "teste",
         "id": 5,
         "name": "Smoke"
@@ -1018,6 +1020,7 @@
     {
       "method": "PUT",
       "path": "/categories/1",
+      "auth": true,
       "status": 200,
       "keys": [
         "color",
@@ -1028,7 +1031,7 @@
       ],
       "body": {
         "color": "#3498db",
-        "created_at": "2026-10-26 23:45:07.707676",
+        "created_at": "2026-10-27 01:27:45.997269",
         "description": "Tarefas de backend",
         "id": 1,
         "name": "Trabalho"
@@ -1037,6 +1040,7 @@
     {
       "method": "DELETE",
       "path": "/tasks/2",
+      "auth": true,
       "status": 200,
       "keys": [
         "message"
@@ -1048,6 +1052,7 @@
     {
       "method": "DELETE",
       "path": "/categories/4",
+      "auth": true,
       "status": 200,
       "keys": [
         "message"
@@ -1059,6 +1064,7 @@
     {
       "method": "DELETE",
       "path": "/users/3",
+      "auth": true,
       "status": 200,
       "keys": [
         "message"

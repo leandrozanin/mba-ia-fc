@@ -1,13 +1,16 @@
-const PAYMENT_STATUS = { PAID: 'PAID', DENIED: 'DENIED' };
+const { PAYMENT_STATUS } = require('../models/paymentModel');
+
+// Gateway simulado: mantém a regra legada em que cartões iniciados por "4"
+// são aprovados. A chave do gateway nunca é registrada em log.
 const APPROVED_CARD_PREFIX = '4';
 
-/** Gateway simulado: aprova cartões iniciados em 4. Substituível por um real via injeção. */
-function createSimulatedGateway() {
+function createPaymentGateway({ apiKey } = {}) {
     return {
+        apiKey,
         async charge({ cardNumber }) {
             return cardNumber.startsWith(APPROVED_CARD_PREFIX) ? PAYMENT_STATUS.PAID : PAYMENT_STATUS.DENIED;
         },
     };
 }
 
-module.exports = { PAYMENT_STATUS, createSimulatedGateway };
+module.exports = { createPaymentGateway };

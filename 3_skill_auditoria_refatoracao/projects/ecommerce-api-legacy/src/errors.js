@@ -1,3 +1,4 @@
+// Erros esperados carregam o status e o corpo de texto do contrato HTTP legado.
 class AppError extends Error {
     constructor(status, message) {
         super(message);
@@ -5,11 +6,28 @@ class AppError extends Error {
     }
 }
 
-// Mensagens em texto puro, como no contrato original da API.
-const badRequest = (message = 'Bad Request') => new AppError(400, message);
-const unauthorized = (message = 'Não autorizado') => new AppError(401, message);
-const forbidden = (message) => new AppError(403, message);
-const notFound = (message) => new AppError(404, message);
-const conflict = (message) => new AppError(409, message);
+class ValidationError extends AppError {
+    constructor() {
+        super(400, 'Bad Request');
+    }
+}
 
-module.exports = { AppError, badRequest, unauthorized, forbidden, notFound, conflict };
+class NotFoundError extends AppError {
+    constructor(message) {
+        super(404, message);
+    }
+}
+
+class PaymentDeniedError extends AppError {
+    constructor() {
+        super(400, 'Pagamento recusado');
+    }
+}
+
+class UnauthorizedError extends AppError {
+    constructor() {
+        super(401, 'Unauthorized');
+    }
+}
+
+module.exports = { AppError, ValidationError, NotFoundError, PaymentDeniedError, UnauthorizedError };

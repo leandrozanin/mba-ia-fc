@@ -5,6 +5,7 @@
     {
       "method": "GET",
       "path": "/",
+      "auth": false,
       "status": 200,
       "keys": [
         "endpoints",
@@ -27,20 +28,19 @@
     {
       "method": "GET",
       "path": "/health",
+      "auth": false,
       "status": 200,
       "keys": [
-        "ambiente",
         "counts",
         "database",
         "status",
         "versao"
       ],
       "body": {
-        "ambiente": "desenvolvimento",
         "counts": {
           "pedidos": 0,
           "produtos": 10,
-          "usuarios": 3
+          "usuarios": 1
         },
         "database": "connected",
         "status": "ok",
@@ -48,8 +48,32 @@
       }
     },
     {
+      "method": "POST",
+      "path": "/login",
+      "auth": false,
+      "status": 200,
+      "keys": [
+        "dados",
+        "mensagem",
+        "sucesso",
+        "token"
+      ],
+      "body": {
+        "dados": {
+          "email": "admin@smoke.com",
+          "id": 1,
+          "nome": "Admin",
+          "tipo": "admin"
+        },
+        "mensagem": "Login OK",
+        "sucesso": true,
+        "token": "eyJpZCI6MX0.at_-CQ.bdseQHLOlOqQCvJuYj1m53F0pqk"
+      }
+    },
+    {
       "method": "GET",
       "path": "/produtos",
+      "auth": false,
       "status": 200,
       "keys": [
         "dados",
@@ -60,7 +84,7 @@
           {
             "ativo": 1,
             "categoria": "informatica",
-            "criado_em": "2026-10-26 23:38:38",
+            "criado_em": "2026-10-27 01:27:35",
             "descricao": "Notebook potente para jogos",
             "estoque": 10,
             "id": 1,
@@ -70,7 +94,7 @@
           {
             "ativo": 1,
             "categoria": "informatica",
-            "criado_em": "2026-10-26 23:38:38",
+            "criado_em": "2026-10-27 01:27:35",
             "descricao": "Mouse sem fio ergonômico",
             "estoque": 50,
             "id": 2,
@@ -80,7 +104,7 @@
           {
             "ativo": 1,
             "categoria": "informatica",
-            "criado_em": "2026-10-26 23:38:38",
+            "criado_em": "2026-10-27 01:27:35",
             "descricao": "Teclado mecânico RGB",
             "estoque": 30,
             "id": 3,
@@ -90,7 +114,7 @@
           {
             "ativo": 1,
             "categoria": "informatica",
-            "criado_em": "2026-10-26 23:38:38",
+            "criado_em": "2026-10-27 01:27:35",
             "descricao": "Monitor 27 polegadas 144hz",
             "estoque": 15,
             "id": 4,
@@ -100,7 +124,7 @@
           {
             "ativo": 1,
             "categoria": "informatica",
-            "criado_em": "2026-10-26 23:38:38",
+            "criado_em": "2026-10-27 01:27:35",
             "descricao": "Headset com microfone",
             "estoque": 25,
             "id": 5,
@@ -110,7 +134,7 @@
           {
             "ativo": 1,
             "categoria": "moveis",
-            "criado_em": "2026-10-26 23:38:38",
+            "criado_em": "2026-10-27 01:27:35",
             "descricao": "Cadeira ergonômica",
             "estoque": 8,
             "id": 6,
@@ -120,7 +144,7 @@
           {
             "ativo": 1,
             "categoria": "informatica",
-            "criado_em": "2026-10-26 23:38:38",
+            "criado_em": "2026-10-27 01:27:35",
             "descricao": "Webcam 1080p",
             "estoque": 20,
             "id": 7,
@@ -130,7 +154,7 @@
           {
             "ativo": 1,
             "categoria": "informatica",
-            "criado_em": "2026-10-26 23:38:38",
+            "criado_em": "2026-10-27 01:27:35",
             "descricao": "Hub USB 3.0 7 portas",
             "estoque": 40,
             "id": 8,
@@ -140,7 +164,7 @@
           {
             "ativo": 1,
             "categoria": "informatica",
-            "criado_em": "2026-10-26 23:38:38",
+            "criado_em": "2026-10-27 01:27:35",
             "descricao": "SSD NVMe 1TB",
             "estoque": 35,
             "id": 9,
@@ -150,7 +174,7 @@
           {
             "ativo": 1,
             "categoria": "vestuario",
-            "criado_em": "2026-10-26 23:38:38",
+            "criado_em": "2026-10-27 01:27:35",
             "descricao": "Camiseta estampa código",
             "estoque": 100,
             "id": 10,
@@ -164,6 +188,7 @@
     {
       "method": "GET",
       "path": "/produtos/1",
+      "auth": false,
       "status": 200,
       "keys": [
         "dados",
@@ -173,7 +198,7 @@
         "dados": {
           "ativo": 1,
           "categoria": "informatica",
-          "criado_em": "2026-10-26 23:38:38",
+          "criado_em": "2026-10-27 01:27:35",
           "descricao": "Notebook potente para jogos",
           "estoque": 10,
           "id": 1,
@@ -186,6 +211,7 @@
     {
       "method": "GET",
       "path": "/produtos/999",
+      "auth": false,
       "status": 404,
       "keys": [
         "erro",
@@ -199,6 +225,7 @@
     {
       "method": "GET",
       "path": "/produtos/busca?q=Mouse&categoria=informatica&preco_min=10&preco_max=500",
+      "auth": false,
       "status": 200,
       "keys": [
         "dados",
@@ -210,7 +237,7 @@
           {
             "ativo": 1,
             "categoria": "informatica",
-            "criado_em": "2026-10-26 23:38:38",
+            "criado_em": "2026-10-27 01:27:35",
             "descricao": "Mouse sem fio ergonômico",
             "estoque": 50,
             "id": 2,
@@ -225,6 +252,7 @@
     {
       "method": "POST",
       "path": "/produtos",
+      "auth": true,
       "status": 201,
       "keys": [
         "dados",
@@ -242,17 +270,21 @@
     {
       "method": "POST",
       "path": "/produtos",
+      "auth": true,
       "status": 400,
       "keys": [
-        "erro"
+        "erro",
+        "sucesso"
       ],
       "body": {
-        "erro": "Nome muito curto"
+        "erro": "Nome muito curto",
+        "sucesso": false
       }
     },
     {
       "method": "PUT",
       "path": "/produtos/1",
+      "auth": true,
       "status": 200,
       "keys": [
         "mensagem",
@@ -266,6 +298,7 @@
     {
       "method": "DELETE",
       "path": "/produtos/11",
+      "auth": true,
       "status": 200,
       "keys": [
         "mensagem",
@@ -279,6 +312,7 @@
     {
       "method": "GET",
       "path": "/usuarios",
+      "auth": true,
       "status": 200,
       "keys": [
         "dados",
@@ -287,25 +321,11 @@
       "body": {
         "dados": [
           {
-            "criado_em": "2026-10-26 23:38:38",
-            "email": "admin@loja.com",
+            "criado_em": "2026-10-27 01:27:36",
+            "email": "admin@smoke.com",
             "id": 1,
             "nome": "Admin",
             "tipo": "admin"
-          },
-          {
-            "criado_em": "2026-10-26 23:38:38",
-            "email": "joao@email.com",
-            "id": 2,
-            "nome": "João Silva",
-            "tipo": "cliente"
-          },
-          {
-            "criado_em": "2026-10-26 23:38:38",
-            "email": "maria@email.com",
-            "id": 3,
-            "nome": "Maria Santos",
-            "tipo": "cliente"
           }
         ],
         "sucesso": true
@@ -314,6 +334,7 @@
     {
       "method": "GET",
       "path": "/usuarios/1",
+      "auth": true,
       "status": 200,
       "keys": [
         "dados",
@@ -321,8 +342,8 @@
       ],
       "body": {
         "dados": {
-          "criado_em": "2026-10-26 23:38:38",
-          "email": "admin@loja.com",
+          "criado_em": "2026-10-27 01:27:36",
+          "email": "admin@smoke.com",
           "id": 1,
           "nome": "Admin",
           "tipo": "admin"
@@ -333,6 +354,7 @@
     {
       "method": "POST",
       "path": "/usuarios",
+      "auth": false,
       "status": 201,
       "keys": [
         "dados",
@@ -340,7 +362,7 @@
       ],
       "body": {
         "dados": {
-          "id": 4
+          "id": 2
         },
         "sucesso": true
       }
@@ -348,26 +370,7 @@
     {
       "method": "POST",
       "path": "/login",
-      "status": 200,
-      "keys": [
-        "dados",
-        "mensagem",
-        "sucesso"
-      ],
-      "body": {
-        "dados": {
-          "email": "smoke@teste.com",
-          "id": 4,
-          "nome": "Smoke",
-          "tipo": "cliente"
-        },
-        "mensagem": "Login OK",
-        "sucesso": true
-      }
-    },
-    {
-      "method": "POST",
-      "path": "/login",
+      "auth": false,
       "status": 401,
       "keys": [
         "erro",
@@ -381,6 +384,7 @@
     {
       "method": "POST",
       "path": "/pedidos",
+      "auth": true,
       "status": 201,
       "keys": [
         "dados",
@@ -399,6 +403,7 @@
     {
       "method": "POST",
       "path": "/pedidos",
+      "auth": true,
       "status": 400,
       "keys": [
         "erro",
@@ -412,6 +417,7 @@
     {
       "method": "GET",
       "path": "/pedidos",
+      "auth": true,
       "status": 200,
       "keys": [
         "dados",
@@ -420,7 +426,7 @@
       "body": {
         "dados": [
           {
-            "criado_em": "2026-10-26 23:38:39",
+            "criado_em": "2026-10-27 01:27:37",
             "id": 1,
             "itens": [
               {
@@ -432,7 +438,7 @@
             ],
             "status": "pendente",
             "total": 179.8,
-            "usuario_id": 2
+            "usuario_id": 1
           }
         ],
         "sucesso": true
@@ -440,7 +446,8 @@
     },
     {
       "method": "GET",
-      "path": "/pedidos/usuario/2",
+      "path": "/pedidos/usuario/1",
+      "auth": true,
       "status": 200,
       "keys": [
         "dados",
@@ -449,7 +456,7 @@
       "body": {
         "dados": [
           {
-            "criado_em": "2026-10-26 23:38:39",
+            "criado_em": "2026-10-27 01:27:37",
             "id": 1,
             "itens": [
               {
@@ -461,7 +468,7 @@
             ],
             "status": "pendente",
             "total": 179.8,
-            "usuario_id": 2
+            "usuario_id": 1
           }
         ],
         "sucesso": true
@@ -470,6 +477,7 @@
     {
       "method": "PUT",
       "path": "/pedidos/1/status",
+      "auth": true,
       "status": 200,
       "keys": [
         "mensagem",
@@ -483,17 +491,21 @@
     {
       "method": "PUT",
       "path": "/pedidos/1/status",
+      "auth": true,
       "status": 400,
       "keys": [
-        "erro"
+        "erro",
+        "sucesso"
       ],
       "body": {
-        "erro": "Status inválido"
+        "erro": "Status inválido",
+        "sucesso": false
       }
     },
     {
       "method": "GET",
       "path": "/relatorios/vendas",
+      "auth": true,
       "status": 200,
       "keys": [
         "dados",
@@ -514,25 +526,45 @@
       }
     },
     {
-      "method": "POST",
-      "path": "/admin/query",
-      "status": 404,
+      "method": "GET",
+      "path": "/usuarios",
+      "auth": false,
+      "status": 401,
       "keys": [
-        "erro"
+        "erro",
+        "sucesso"
       ],
       "body": {
-        "erro": "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again."
+        "erro": "Autenticação necessária",
+        "sucesso": false
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/admin/query",
+      "auth": false,
+      "status": 404,
+      "keys": [
+        "erro",
+        "sucesso"
+      ],
+      "body": {
+        "erro": "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.",
+        "sucesso": false
       }
     },
     {
       "method": "POST",
       "path": "/admin/reset-db",
-      "status": 403,
+      "auth": false,
+      "status": 404,
       "keys": [
-        "erro"
+        "erro",
+        "sucesso"
       ],
       "body": {
-        "erro": "Reset do banco desabilitado neste ambiente"
+        "erro": "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.",
+        "sucesso": false
       }
     }
   ]

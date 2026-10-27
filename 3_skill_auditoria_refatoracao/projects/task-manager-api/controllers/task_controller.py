@@ -1,117 +1,155 @@
 import logging
 
-from flask import current_app
 from sqlalchemy import func
 from sqlalchemy.orm import joinedload
 
-from controllers.validators import parse_int_arg, validate_task
+from controllers.errors import NotFoundError, ValidationError, commit
+from controllers.validation import (
+    normalize_tags,
+    parse_due_date,
+    parse_int,
+    require_payload,
+    validate_priority,
+    validate_status,
+    validate_title,
+)
 from database import db
-from errors import NotFoundError
 from models.category import Category
+from models.constants import DEFAULT_PRIORITY, DEFAULT_STATUS, DONE_STATUS, TASK_STATUSES
 from models.task import Task
 from models.user import User
-from utils.constants import CLOSED_STATUSES, STATUS_CANCELLED, STATUS_DONE, STATUS_IN_PROGRESS, STATUS_PENDING
-from utils.dates import utcnow
+from utils.helpers import calculate_percentage, utc_now
 
 logger = logging.getLogger(__name__)
 
 
 def get_task_or_404(task_id):
     task = db.session.get(Task, task_id)
-    if task is None:
+    if not task:
         raise NotFoundError('Task não encontrada')
     return task
 
 
-def _ensure_references(fields):
-    if fields.get('user_id') and db.session.get(User, fields['user_id']) is None:
-        raise NotFoundError('Usuário não encontrado')
-    if fields.get('category_id') and db.session.get(Category, fields['category_id']) is None:
-        raise NotFoundError('Categoria não encontrada')
-
-
-def overdue_filter(now=None):
-    return db.and_(Task.due_date.is_not(None), Task.due_date < (now or utcnow()), Task.status.not_in(CLOSED_STATUSES))
-
-
 def list_tasks():
-    # joinedload traz usuário e categoria na mesma consulta (antes: 1 + 2N).
-    query = db.select(Task).options(joinedload(Task.user), joinedload(Task.category)).order_by(Task.id)
-    return [task.to_list_dict() for task in db.session.scalars(query)]
+    return (
+        Task.query.options(joinedload(Task.user), joinedload(Task.category))
+        .order_by(Task.id)
+        .all()
+    )
 
 
-def get_task(task_id):
-    return get_task_or_404(task_id).to_detail_dict()
+def _resolve_user_id(value):
+    if not value:
+        return None
+    user_id = parse_int(value, 'Usuário não encontrado')
+    if not db.session.get(User, user_id):
+        raise NotFoundError('Usuário não encontrado')
+    return user_id
+
+
+def _resolve_category_id(value):
+    if not value:
+        return None
+    category_id = parse_int(value, 'Categoria não encontrada')
+    if not db.session.get(Category, category_id):
+        raise NotFoundError('Categoria não encontrada')
+    return category_id
 
 
 def create_task(data):
-    fields = validate_task(data)
-    _ensure_references(fields)
+    require_payload(data)
 
-    task = Task(**fields)
+    title = data.get('title')
+    if not title:
+        raise ValidationError('Título é obrigatório')
+    validate_title(title)
+    status = validate_status(data.get('status', DEFAULT_STATUS))
+    priority = validate_priority(data.get('priority', DEFAULT_PRIORITY))
+    user_id = _resolve_user_id(data.get('user_id'))
+    category_id = _resolve_category_id(data.get('category_id'))
+
+    task = Task(
+        title=title,
+        description=data.get('description', ''),
+        status=status,
+        priority=priority,
+        user_id=user_id,
+        category_id=category_id,
+    )
+    if data.get('due_date'):
+        task.due_date = parse_due_date(data['due_date'])
+    if data.get('tags'):
+        task.tags = normalize_tags(data['tags'])
+
     db.session.add(task)
-    db.session.commit()
+    commit('Erro ao criar task')
     logger.info('Task criada: id=%s', task.id)
-
-    if task.user:
-        current_app.extensions['notifier'].notify_task_assigned(task.user, task)
-    return task.to_dict()
+    return task
 
 
 def update_task(task_id, data):
     task = get_task_or_404(task_id)
-    fields = validate_task(data, partial=True)
-    _ensure_references(fields)
+    require_payload(data)
 
-    for field, value in fields.items():
+    # Valida tudo antes de alterar a entidade, na mesma ordem da versão anterior.
+    changes = {}
+    if 'title' in data:
+        changes['title'] = validate_title(data['title'])
+    if 'description' in data:
+        changes['description'] = data['description']
+    if 'status' in data:
+        changes['status'] = validate_status(data['status'])
+    if 'priority' in data:
+        changes['priority'] = validate_priority(data['priority'])
+    if 'user_id' in data:
+        changes['user_id'] = _resolve_user_id(data['user_id'])
+    if 'category_id' in data:
+        changes['category_id'] = _resolve_category_id(data['category_id'])
+    if 'due_date' in data:
+        changes['due_date'] = parse_due_date(data['due_date']) if data['due_date'] else None
+    if 'tags' in data:
+        changes['tags'] = normalize_tags(data['tags']) if data['tags'] is not None else None
+
+    for field, value in changes.items():
         setattr(task, field, value)
-    task.updated_at = utcnow()
-    db.session.commit()
+    task.updated_at = utc_now()
+
+    commit('Erro ao atualizar')
     logger.info('Task atualizada: id=%s', task.id)
-    return task.to_dict()
+    return task
 
 
 def delete_task(task_id):
-    db.session.delete(get_task_or_404(task_id))
-    db.session.commit()
+    task = get_task_or_404(task_id)
+    db.session.delete(task)
+    commit('Erro ao deletar')
     logger.info('Task deletada: id=%s', task_id)
 
 
-def search_tasks(args):
-    query = db.select(Task)
-    term = args.get('q', '')
-    if term:
-        query = query.where(db.or_(Task.title.like(f'%{term}%'), Task.description.like(f'%{term}%')))
-    if args.get('status'):
-        query = query.where(Task.status == args['status'])
-    priority = parse_int_arg(args.get('priority'), 'Prioridade')
-    if priority is not None:
-        query = query.where(Task.priority == priority)
-    user_id = parse_int_arg(args.get('user_id'), 'Usuário')
-    if user_id is not None:
-        query = query.where(Task.user_id == user_id)
-    return [task.to_dict() for task in db.session.scalars(query.order_by(Task.id))]
+def search_tasks(text='', status='', priority='', user_id=''):
+    query = Task.query
+    if text:
+        query = query.filter(db.or_(Task.title.like(f'%{text}%'), Task.description.like(f'%{text}%')))
+    if status:
+        query = query.filter(Task.status == status)
+    if priority:
+        query = query.filter(Task.priority == parse_int(priority, 'Prioridade inválida'))
+    if user_id:
+        query = query.filter(Task.user_id == parse_int(user_id, 'user_id inválido'))
+    return query.order_by(Task.id).all()
 
 
 def count_by_status():
-    rows = db.session.execute(db.select(Task.status, func.count(Task.id)).group_by(Task.status))
-    return dict(rows.all())
-
-
-def count_overdue():
-    return db.session.scalar(db.select(func.count(Task.id)).where(overdue_filter()))
+    counts = dict(db.session.query(Task.status, func.count(Task.id)).group_by(Task.status).all())
+    return {status: counts.get(status, 0) for status in TASK_STATUSES}, sum(counts.values())
 
 
 def task_stats():
-    by_status = count_by_status()
-    total = sum(by_status.values())
-    done = by_status.get(STATUS_DONE, 0)
+    by_status, total = count_by_status()
+    overdue = Task.query.filter(Task.overdue_filter()).count()
     return {
         'total': total,
-        'pending': by_status.get(STATUS_PENDING, 0),
-        'in_progress': by_status.get(STATUS_IN_PROGRESS, 0),
-        'done': done,
-        'cancelled': by_status.get(STATUS_CANCELLED, 0),
-        'overdue': count_overdue(),
-        'completion_rate': round((done / total) * 100, 2) if total > 0 else 0,
+        **by_status,
+        'overdue': overdue,
+        'completion_rate': calculate_percentage(by_status[DONE_STATUS], total),
     }
